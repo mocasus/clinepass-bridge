@@ -1,0 +1,33 @@
+# Fly.io configuration — https://fly.io/docs/reference/configuration/
+app = "clinepass-bridge"
+primary_region = "sin"          # Singapore — closest to ID. Change if you like.
+
+[build]
+  # Uses the repo's Dockerfile automatically.
+
+[env]
+  HOST = "0.0.0.0"
+  PORT = "8080"
+  NODE_ENV = "production"
+  SYNC_PROVIDERS_JSON = "false" # no Cline CLI store on the server
+
+# Secrets (API_KEYS, CLINE_ACCESS_TOKEN, CLINE_REFRESH_TOKEN) are set via:
+#   fly secrets set API_KEYS=... CLINE_REFRESH_TOKEN=...
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"   # save free-tier allowance when idle
+  auto_start_machines = true
+  min_machines_running = 0
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

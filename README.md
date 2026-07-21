@@ -1,5 +1,10 @@
 # clinepass-bridge
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](package.json)
+
+> **Repo:** https://github.com/mocasus/clinepass-bridge
+
 A tiny **OpenAI-compatible API bridge** that lets you use your **Cline Pass** account from
 any tool that speaks the OpenAI API — Cursor, Continue.dev, LibreChat, the `openai` SDK,
 `curl`, you name it.
@@ -47,6 +52,37 @@ curl http://127.0.0.1:8787/v1/chat/completions \
   -d '{"model":"kimi-k3","messages":[{"role":"user","content":"hi"}]}'
 ```
 
+## Use with your favorite tools
+
+Point any OpenAI-compatible client at the bridge:
+
+| Tool | Base URL | API Key |
+|---|---|---|
+| **Continue.dev** | `http://127.0.0.1:8787/v1` | your `sk-cpb-…` |
+| **Cursor** (custom OpenAI) | `http://127.0.0.1:8787/v1` | your `sk-cpb-…` |
+| **LibreChat** | `http://127.0.0.1:8787/v1` | your `sk-cpb-…` |
+
+**OpenAI SDK (Python / Node):**
+
+```python
+from openai import OpenAI
+client = OpenAI(base_url="http://127.0.0.1:8787/v1", api_key="sk-cpb-…")
+print(client.chat.completions.create(
+    model="kimi-k3",
+    messages=[{"role": "user", "content": "hello"}],
+).choices[0].message.content)
+```
+
+```ts
+import OpenAI from "openai";
+const client = new OpenAI({ baseURL: "http://127.0.0.1:8787/v1", apiKey: "sk-cpb-…" });
+const res = await client.chat.completions.create({
+  model: "glm-5.2",
+  messages: [{ role: "user", content: "hello" }],
+});
+console.log(res.choices[0].message.content);
+```
+
 ## Configuration
 
 See `.env.example`. The essentials:
@@ -68,11 +104,30 @@ See `.env.example`. The essentials:
 
 ```bash
 docker build -t clinepass-bridge .
-docker run --rm -p 8787:8787 \
+docker run --rm -p 8787:8080 \
+  -e HOST=0.0.0.0 -e PORT=8080 \
   -e API_KEYS=sk-cpb-… \
   -e CLINE_REFRESH_TOKEN=… \
   clinepass-bridge
 ```
+
+## Deploy to Fly.io
+
+The repo ships a ready `fly.toml`.
+
+```bash
+fly launch --no-deploy          # creates the app (uses fly.toml)
+fly secrets set \
+  API_KEYS=sk-cpb-… \
+  CLINE_ACCESS_TOKEN=workos:eyJ… \
+  CLINE_REFRESH_TOKEN=…
+fly deploy
+fly open                        # https://clinepass-bridge.fly.dev
+```
+
+> **Note:** a long-running HTTP server doesn't fit serverless platforms
+> (Vercel/Netlify) — their request timeouts kill LLM streaming. Use a VM-style
+> host (Fly.io, Railway, Render) or run it locally.
 
 ## Models
 
