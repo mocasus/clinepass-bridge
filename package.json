@@ -1,0 +1,30 @@
+{
+  "name": "clinepass-bridge",
+  "version": "0.1.0",
+  "description": "OpenAI-compatible API bridge for Cline Pass — use your Cline account from any tool that speaks the OpenAI API",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "genkey": "node scripts/genkey.mjs"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.4",
+    "dotenv": "^17.2.1",
+    "hono": "^4.9.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
