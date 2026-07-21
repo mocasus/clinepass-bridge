@@ -3,256 +3,784 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>clinepass-bridge</title>
-<meta name="description" content="OpenAI-compatible API bridge for Cline Pass">
+<title>clinepass-bridge — Docs</title>
+<meta name="description" content="OpenAI-compatible API bridge for Cline Pass. Use your Cline Pass from any tool.">
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --bg:#0d0d0d;
-    --fg:#e4e4e7;
-    --muted:#71717a;
-    --border:#27272a;
-    --code-bg:#18181b;
-    --purple:#a78bfa;
-    --green:#4ade80;
-    --red:#f87171;
-    --amber:#fbbf24;
+:root{
+  --bg:#0a0a0a;
+  --bg-2:#0f0f10;
+  --panel:#141416;
+  --panel-2:#1a1a1d;
+  --border:rgba(255,255,255,.07);
+  --border-strong:rgba(255,255,255,.12);
+  --text:#fafafa;
+  --text-2:#a1a1aa;
+  --text-3:#71717a;
+  --purple:#a78bfa;
+  --purple-strong:#8b5cf6;
+  --purple-glow:rgba(167,139,250,.15);
+  --green:#4ade80;
+  --amber:#fbbf24;
+  --red:#f87171;
+  --cyan:#22d3ee;
+  --radius:10px;
+  --radius-sm:6px;
+  --font-sans:'Inter',system-ui,-apple-system,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:var(--font-sans);font-size:15px;line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--purple-strong);color:#fff}
+a{color:var(--purple);text-decoration:none}
+a:hover{color:var(--purple-strong)}
+
+/* Layout */
+.layout{display:flex;min-height:100vh}
+.sidebar{
+  width:240px;flex-shrink:0;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  border-right:1px solid var(--border);
+  padding:24px 16px;
+  background:var(--bg-2);
+}
+.main{flex:1;min-width:0}
+.toc{
+  width:200px;flex-shrink:0;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  padding:24px 16px;font-size:13px;
+}
+
+/* Sidebar */
+.sidebar-brand{
+  font-weight:700;font-size:15px;letter-spacing:-.3px;
+  display:flex;align-items:center;gap:8px;
+  padding:8px 10px;margin-bottom:20px;
+}
+.sidebar-brand .dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--purple);
+  box-shadow:0 0 12px var(--purple);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.6;transform:scale(.85)}
+}
+.sidebar-section{
+  font-size:11px;font-weight:600;text-transform:uppercase;
+  letter-spacing:1px;color:var(--text-3);
+  padding:0 10px;margin:18px 0 6px;
+}
+.sidebar-link{
+  display:block;padding:6px 10px;border-radius:var(--radius-sm);
+  color:var(--text-2);font-size:13.5px;text-decoration:none;
+  transition:all .15s;
+}
+.sidebar-link:hover{color:var(--text);background:var(--panel)}
+.sidebar-link.active{
+  color:var(--purple);background:var(--purple-glow);
+  border-left:2px solid var(--purple);
+  padding-left:8px;
+}
+
+/* TOC */
+.toc-title{
+  font-size:11px;font-weight:600;text-transform:uppercase;
+  letter-spacing:1px;color:var(--text-3);
+  margin-bottom:12px;
+}
+.toc-link{
+  display:block;padding:4px 0;color:var(--text-3);
+  font-size:13px;text-decoration:none;
+  border-left:2px solid var(--border);
+  padding-left:12px;margin-left:2px;
+  transition:all .15s;
+}
+.toc-link:hover{color:var(--text)}
+.toc-link.active{color:var(--purple);border-left-color:var(--purple)}
+.toc-link.sub{padding-left:24px}
+
+/* Main content */
+.content{
+  max-width:760px;padding:48px 48px 120px;
+  margin:0 auto;
+}
+.hero{padding:24px 0 48px;border-bottom:1px solid var(--border);margin-bottom:48px}
+.hero h1{
+  font-size:38px;font-weight:800;letter-spacing:-1.2px;line-height:1.15;
+  margin-bottom:14px;
+  background:linear-gradient(135deg,#fff 0%,var(--purple) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.hero p{font-size:16.5px;color:var(--text-2);max-width:560px}
+
+/* Sections */
+section{margin-bottom:64px;scroll-margin-top:24px}
+h2{
+  font-size:24px;font-weight:700;letter-spacing:-.5px;
+  margin-bottom:12px;color:var(--text);
+}
+h3{font-size:17px;font-weight:600;margin:28px 0 10px;color:var(--text)}
+p{color:var(--text-2);margin-bottom:14px}
+strong{color:var(--text)}
+ul,ol{color:var(--text-2);margin:8px 0 16px 22px}
+li{margin-bottom:6px}
+
+/* Reveal animation */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* Code blocks */
+.codeblock{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  margin:14px 0;
+  overflow:hidden;
+}
+.codeblock-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;
+  border-bottom:1px solid var(--border);
+  background:var(--panel-2);
+  font-size:12px;color:var(--text-3);
+  font-family:var(--font-mono);
+}
+.copy-btn{
+  background:transparent;border:1px solid var(--border);
+  color:var(--text-2);font-size:11px;font-weight:600;
+  padding:3px 10px;border-radius:4px;cursor:pointer;
+  font-family:var(--font-sans);
+  transition:all .15s;
+}
+.copy-btn:hover{color:var(--text);border-color:var(--border-strong);background:var(--panel)}
+.copy-btn.copied{color:var(--green);border-color:var(--green)}
+.codeblock pre{
+  padding:16px 18px;overflow-x:auto;
+  font-family:var(--font-mono);font-size:13px;line-height:1.7;
+}
+code{font-family:var(--font-mono);font-size:13px}
+:not(pre)>code{
+  background:var(--panel-2);padding:2px 6px;border-radius:4px;
+  font-size:13px;color:var(--purple);
+  border:1px solid var(--border);
+}
+
+/* Syntax colors */
+.tk-k{color:#c792ea}     /* keyword */
+.tk-s{color:#c3e88d}     /* string */
+.tk-c{color:#546e7a}     /* comment */
+.tk-f{color:#82aaff}     /* function */
+.tk-n{color:#f78c6c}     /* number */
+.tk-v{color:#f07178}     /* variable */
+.tk-o{color:#89ddff}     /* operator */
+
+/* Tabs */
+.tabs{
+  display:flex;gap:2px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:-1px;
+  background:var(--panel-2);
+  padding:0 12px;
+}
+.tab{
+  padding:10px 14px;font-size:13px;font-weight:500;
+  color:var(--text-3);background:transparent;border:none;cursor:pointer;
+  border-bottom:2px solid transparent;
+  font-family:var(--font-sans);
+  transition:all .15s;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--purple);border-bottom-color:var(--purple)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* Callouts */
+.callout{
+  border-radius:var(--radius);
+  padding:14px 16px;margin:16px 0;
+  border:1px solid;
+  font-size:14px;
+  display:flex;gap:12px;align-items:flex-start;
+}
+.callout-icon{font-size:16px;flex-shrink:0;line-height:1.5}
+.callout.info{background:rgba(167,139,250,.07);border-color:rgba(167,139,250,.25);color:#d4d4d8}
+.callout.warn{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.25);color:#fde68a}
+.callout.tip{background:rgba(74,222,128,.06);border-color:rgba(74,222,128,.25);color:#bbf7d0}
+.callout.danger{background:rgba(248,113,113,.06);border-color:rgba(248,113,113,.25);color:#fecaca}
+
+/* Tables */
+.table-wrap{
+  border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;margin:14px 0;overflow-x:auto;
+}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{
+  text-align:left;font-weight:600;color:var(--text-3);
+  font-size:11px;text-transform:uppercase;letter-spacing:.8px;
+  padding:10px 14px;
+  background:var(--panel-2);
+  border-bottom:1px solid var(--border);
+}
+td{
+  padding:10px 14px;border-bottom:1px solid var(--border);
+  color:var(--text-2);
+}
+tr:last-child td{border-bottom:none}
+td:first-child{color:var(--text);font-family:var(--font-mono);font-size:12.5px}
+tr:hover td{background:rgba(255,255,255,.015)}
+
+/* Badges */
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:10px;
+  font-size:11px;font-weight:600;
+}
+.badge.ok{background:rgba(74,222,128,.12);color:var(--green)}
+.badge.no{background:rgba(248,113,113,.12);color:var(--red)}
+.badge.warn{background:rgba(251,191,36,.12);color:var(--amber)}
+.badge.info{background:rgba(167,139,250,.12);color:var(--purple)}
+
+/* Steps */
+.steps{counter-reset:step;margin:20px 0}
+.step{
+  position:relative;padding-left:44px;margin-bottom:20px;
+  counter-increment:step;
+}
+.step::before{
+  content:counter(step);
+  position:absolute;left:0;top:0;
+  width:28px;height:28px;border-radius:50%;
+  background:var(--purple-glow);
+  border:1px solid var(--purple);
+  color:var(--purple);
+  font-size:13px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+}
+.step::after{
+  content:'';
+  position:absolute;left:14px;top:32px;bottom:-8px;
+  width:1px;background:var(--border);
+}
+.step:last-child::after{display:none}
+.step-title{font-weight:600;font-size:15px;margin-bottom:4px;color:var(--text)}
+
+/* Model grid */
+.model-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:10px;margin:16px 0;
+}
+.model-card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--radius-sm);padding:12px 14px;
+  transition:all .2s;
+}
+.model-card:hover{border-color:var(--purple);transform:translateY(-2px)}
+.model-name{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--text)}
+.model-ctx{font-size:11px;color:var(--text-3);margin-top:2px}
+
+/* Footer */
+footer{
+  border-top:1px solid var(--border);
+  padding:32px 48px;color:var(--text-3);font-size:13px;
+  text-align:center;
+}
+
+/* Mobile */
+@media(max-width:1100px){.toc{display:none}}
+@media(max-width:860px){
+  .sidebar{
+    position:fixed;left:-240px;z-index:100;
+    transition:left .3s;
+    background:var(--bg-2);
   }
-  html{scroll-behavior:smooth}
-  body{
-    background:var(--bg);color:var(--fg);
-    font-family:system-ui,-apple-system,sans-serif;
-    line-height:1.7;font-size:15px;
-    -webkit-font-smoothing:antialiased;
+  .sidebar.open{left:0;box-shadow:0 0 60px rgba(0,0,0,.7)}
+  .content{padding:32px 20px 80px}
+  .hero h1{font-size:28px}
+  .menu-btn{
+    position:fixed;top:16px;left:16px;z-index:101;
+    background:var(--panel);border:1px solid var(--border);
+    color:var(--text);padding:8px 12px;border-radius:6px;
+    cursor:pointer;font-size:18px;
   }
-  a{color:var(--purple);text-decoration:none}
-  a:hover{text-decoration:underline}
-  code{font-family:'SF Mono',Menlo,monospace;font-size:13px}
-  :not(pre)>code{background:var(--code-bg);padding:1px 5px;border-radius:4px}
-  pre{
-    background:var(--code-bg);border:1px solid var(--border);
-    border-radius:6px;padding:16px 20px;overflow-x:auto;
-    font-size:13px;line-height:1.7;margin:12px 0;
-  }
-  
-  .wrap{max-width:800px;margin:0 auto;padding:0 20px}
-  
-  nav{
-    border-bottom:1px solid var(--border);padding:16px 0;
-    position:sticky;top:0;background:var(--bg);z-index:10;
-  }
-  nav .wrap{display:flex;justify-content:space-between;align-items:center}
-  nav b{font-size:16px;letter-spacing:-.3px}
-  nav a{font-size:14px}
-  
-  section{padding:48px 0;border-bottom:1px solid var(--border)}
-  section:last-of-type{border-bottom:none}
-  
-  h1{font-size:24px;font-weight:700;letter-spacing:-.5px;margin-bottom:8px}
-  h2{font-size:18px;font-weight:600;letter-spacing:-.3px;margin:32px 0 8px}
-  h3{font-size:15px;font-weight:600;margin:20px 0 6px;color:var(--purple)}
-  p{color:var(--muted);margin-bottom:12px}
-  ul{margin:8px 0 16px 20px;color:var(--muted)}
-  li{margin-bottom:4px}
-  
-  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
-  th{text-align:left;font-weight:600;color:var(--muted);padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
-  td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--muted)}
-  td:first-child{color:var(--fg);font-family:monospace;font-size:13px}
-  
-  .ok{color:var(--green);font-weight:600}
-  .no{color:var(--red)}
-  .warn{color:var(--amber)}
-  
-  .hero{padding:60px 0 40px}
-  .hero h1 span{color:var(--purple)}
-  .hero .diagram{
-    margin-top:24px;padding:20px;background:var(--code-bg);
-    border:1px solid var(--border);border-radius:6px;
-    font-family:monospace;font-size:13px;line-height:2;
-    color:var(--muted);
-  }
-  
-  .models{
-    display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;
-  }
-  .models span{
-    font-family:monospace;font-size:12px;
-    padding:4px 10px;border:1px solid var(--border);
-    border-radius:14px;color:var(--muted);
-  }
-  
-  footer{padding:24px 0;color:var(--muted);font-size:13px;text-align:center}
-  
-  @media(max-width:600px){
-    pre{padding:12px 14px;font-size:12px}
-    .hero h1{font-size:20px}
-  }
+}
+.menu-btn{display:none}
+@media(max-width:860px){.menu-btn{display:block}}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<nav>
-  <div class="wrap">
-    <b>clinepass-bridge</b>
-    <a href="https://github.com/mocasus/clinepass-bridge">GitHub ↗</a>
-  </div>
-</nav>
+<button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
 
-<div class="wrap">
+<div class="layout">
 
-<!-- Hero -->
-<section class="hero">
-  <h1>Your Cline Pass, <span>anywhere.</span></h1>
-  <p>OpenAI-compatible bridge — use Cline Pass from Cursor, Continue.dev, Aider, or any OpenAI SDK.</p>
-  <div class="diagram">
-    Any OpenAI client — sk-cpb-… → <span style="color:var(--purple)">bridge</span> — WorkOS token → <span style="color:var(--green)">api.cline.bot</span><br>
-    <span style="color:var(--muted)">kimi-k3 · glm-5.2 · deepseek-v4-pro · qwen3.7-max · minimax-m3 · +6 more</span>
-  </div>
-</section>
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="dot"></span>
+      clinepass-bridge
+    </div>
+    
+    <div class="sidebar-section">Getting Started</div>
+    <a href="#introduction" class="sidebar-link active">Introduction</a>
+    <a href="#quickstart" class="sidebar-link">Quick Start</a>
+    <a href="#authentication" class="sidebar-link">Authentication</a>
+    
+    <div class="sidebar-section">Usage</div>
+    <a href="#integrations" class="sidebar-link">Integrations</a>
+    <a href="#sdk" class="sidebar-link">SDK Examples</a>
+    <a href="#streaming" class="sidebar-link">Streaming</a>
+    
+    <div class="sidebar-section">Reference</div>
+    <a href="#models" class="sidebar-link">Models</a>
+    <a href="#api" class="sidebar-link">API Reference</a>
+    <a href="#config" class="sidebar-link">Configuration</a>
+    
+    <div class="sidebar-section">Operations</div>
+    <a href="#deploy" class="sidebar-link">Deploy</a>
+    <a href="#troubleshooting" class="sidebar-link">Troubleshooting</a>
+    
+    <div class="sidebar-section">Links</div>
+    <a href="https://github.com/mocasus/clinepass-bridge" class="sidebar-link" target="_blank">GitHub ↗</a>
+    <a href="https://github.com/mocasus/clinepass-bridge/blob/main/LICENSE" class="sidebar-link" target="_blank">License</a>
+  </aside>
 
-<!-- Quick Start -->
-<section>
-  <h2>Quick Start</h2>
-  
-  <h3>1. Clone & install</h3>
-  <pre><code>git clone https://github.com/mocasus/clinepass-bridge.git
-cd clinepass-bridge
-npm install</code></pre>
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+    <div class="content">
 
-  <h3>2. Generate API key</h3>
-  <pre><code>npm run genkey
-<span style="color:var(--muted)"># → sk-cpb-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</span></code></pre>
+      <!-- Hero -->
+      <div class="hero reveal">
+        <h1>clinepass-bridge</h1>
+        <p>An OpenAI-compatible API bridge that lets you use your <strong>Cline Pass</strong> subscription from any tool — Cursor, Continue.dev, Aider, LibreChat, or the <code>openai</code> SDK.</p>
+      </div>
 
-  <h3>3. Configure .env</h3>
-  <pre><code>cp .env.example .env
-<span style="color:var(--muted)"># edit .env:</span>
-<span style="color:var(--green)">API_KEYS</span>=sk-cpb-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</code></pre>
+      <!-- Introduction -->
+      <section id="introduction" class="reveal">
+        <h2>Introduction</h2>
+        <p>The bridge sits between your favorite AI tool and <code>api.cline.bot</code>, translating standard OpenAI requests into Cline Pass calls. It handles authentication, token refresh, and streaming — so you never think about credentials.</p>
+        
+        <div class="codeblock">
+          <div class="codeblock-header">
+            <span>architecture.txt</span>
+            <button class="copy-btn" data-copy>Copy</button>
+          </div>
+          <pre>[ Your tool ]
+   │  OpenAI API + sk-cpb-…
+   ▼
+[ clinepass-bridge ]
+   │  reads ~/.cline/data/settings/providers.json
+   │  auto-refreshes WorkOS tokens
+   ▼
+[ api.cline.bot ]
+   kimi-k3 · glm-5.2 · deepseek-v4-pro · +8 more</pre>
+        </div>
 
-  <h3>4. Start server</h3>
-  <pre><code>npm run dev
-<span style="color:var(--muted)"># → http://127.0.0.1:8787</span></code></pre>
+        <div class="callout info">
+          <span class="callout-icon">ℹ️</span>
+          <div><strong>How it works:</strong> the bridge reads your local Cline CLI credential store, so as long as you use the Cline CLI or VS Code extension, tokens stay fresh automatically.</div>
+        </div>
+      </section>
 
-  <h3>5. Verify</h3>
-  <pre><code>curl -s http://127.0.0.1:8787/v1/chat/completions \
-  -H "Authorization: Bearer *** \
-  -H "Content-Type: application/json" \
-  -d '{"model":"kimi-k3","messages":[{"role":"user","content":"hi"}]}'</code></pre>
+      <!-- Quick Start -->
+      <section id="quickstart" class="reveal">
+        <h2>Quick Start</h2>
+        <p>Get up and running in under a minute.</p>
 
-  <p>✅ Got <code>"choices"</code> in the response? Done. Point any tool at <code>http://127.0.0.1:8787/v1</code>.</p>
-</section>
+        <div class="steps">
+          <div class="step">
+            <div class="step-title">Clone & install</div>
+            <div class="codeblock">
+              <div class="codeblock-header">
+                <span>bash</span>
+                <button class="copy-btn" data-copy>Copy</button>
+              </div>
+              <pre><span class="tk-f">git</span> clone https://github.com/mocasus/clinepass-bridge.git
+<span class="tk-f">cd</span> clinepass-bridge
+<span class="tk-f">npm</span> install</pre>
+            </div>
+          </div>
 
-<!-- Integrations -->
-<section>
-  <h2>Tool Integration</h2>
-  <p>Any OpenAI-compatible client works. Set base URL + your <code>sk-cpb-…</code> key.</p>
-  
-  <table>
-    <tr><th>Tool</th><th>Base URL</th><th>Key</th></tr>
-    <tr><td>Cursor</td><td>http://127.0.0.1:8787/v1</td><td>sk-cpb-…</td></tr>
-    <tr><td>Continue.dev</td><td>http://127.0.0.1:8787/v1</td><td>sk-cpb-…</td></tr>
-    <tr><td>LibreChat</td><td>http://127.0.0.1:8787/v1</td><td>sk-cpb-…</td></tr>
-    <tr><td>Aider</td><td>http://127.0.0.1:8787/v1</td><td>sk-cpb-…</td></tr>
-    <tr><td>OpenAI SDK</td><td>http://127.0.0.1:8787/v1</td><td>sk-cpb-…</td></tr>
-  </table>
+          <div class="step">
+            <div class="step-title">Generate your API key</div>
+            <div class="codeblock">
+              <div class="codeblock-header">
+                <span>bash</span>
+                <button class="copy-btn" data-copy>Copy</button>
+              </div>
+              <pre><span class="tk-f">npm</span> run genkey
+<span class="tk-c"># → sk-cpb...xxxx</span></pre>
+            </div>
+          </div>
 
-  <h3>Python</h3>
-  <pre><code><span style="color:var(--muted)">from</span> openai <span style="color:var(--muted)">import</span> OpenAI
-client = OpenAI(base_url=<span style="color:var(--green)">"http://127.0.0.1:8787/v1"</span>, api_key=<span style="color:var(--green)">"sk-cpb-…"</span>)
-<span style="color:var(--muted)">print</span>(client.chat.completions.create(
-    model=<span style="color:var(--green)">"kimi-k3"</span>,
-    messages=[{<span style="color:var(--green)">"role"</span>: <span style="color:var(--green)">"user"</span>, <span style="color:var(--green)">"content"</span>: <span style="color:var(--green)">"hello"</span>}]
-).choices[0].message.content)</code></pre>
-</section>
+          <div class="step">
+            <div class="step-title">Configure .env</div>
+            <div class="codeblock">
+              <div class="codeblock-header">
+                <span>.env</span>
+                <button class="copy-btn" data-copy>Copy</button>
+              </div>
+              <pre><span class="tk-v">API_KEYS</span>=sk-cpb...xxxx</pre>
+            </div>
+          </div>
 
-<!-- Models -->
-<section>
-  <h2>Models</h2>
-  <table>
-    <tr><th>Model</th><th>Alias</th><th>Context</th></tr>
-    <tr><td>cline-pass/kimi-k3</td><td>kimi-k3</td><td>1,048,576</td></tr>
-    <tr><td>cline-pass/glm-5.2</td><td>glm-5.2</td><td>1,048,576</td></tr>
-    <tr><td>cline-pass/deepseek-v4-pro</td><td>deepseek-v4-pro</td><td>1,048,576</td></tr>
-    <tr><td>cline-pass/deepseek-v4-flash</td><td>deepseek-v4-flash</td><td>1,048,576</td></tr>
-    <tr><td>cline-pass/mimo-v2.5-pro</td><td>mimo-v2.5-pro</td><td>1,048,576</td></tr>
-    <tr><td>cline-pass/mimo-v2.5</td><td>mimo-v2.5</td><td>1,048,576</td></tr>
-    <tr><td>cline-pass/minimax-m3</td><td>minimax-m3</td><td>1,048,576</td></tr>
-    <tr><td>cline-pass/qwen3.7-max</td><td>qwen3.7-max</td><td>262,144</td></tr>
-    <tr><td>cline-pass/qwen3.7-plus</td><td>qwen3.7-plus</td><td>262,144</td></tr>
-    <tr><td>cline-pass/kimi-k2.7-code</td><td>kimi-k2.7-code</td><td>262,144</td></tr>
-    <tr><td>cline-pass/kimi-k2.6</td><td>kimi-k2.6</td><td>262,144</td></tr>
-  </table>
-</section>
+          <div class="step">
+            <div class="step-title">Start the bridge</div>
+            <div class="codeblock">
+              <div class="codeblock-header">
+                <span>bash</span>
+                <button class="copy-btn" data-copy>Copy</button>
+              </div>
+              <pre><span class="tk-f">npm</span> run dev
+<span class="tk-c"># → http://127.0.0.1:8787</span></pre>
+            </div>
+          </div>
 
-<!-- API -->
-<section>
-  <h2>API Reference</h2>
-  <table>
-    <tr><th>Endpoint</th><th>Status</th><th>Notes</th></tr>
-    <tr><td>POST /v1/chat/completions</td><td><span class="ok">ready</span></td><td>SSE streaming + non-streaming</td></tr>
-    <tr><td>GET /v1/models</td><td><span class="ok">ready</span></td><td>11 models + aliases</td></tr>
-    <tr><td>GET /health</td><td><span class="ok">ready</span></td><td>Deploy health check</td></tr>
-    <tr><td>POST /v1/embeddings</td><td><span class="no">not planned</span></td><td>Not supported upstream</td></tr>
-    <tr><td>/v1/images/*, /v1/audio/*</td><td><span class="no">not planned</span></td><td>Not supported upstream</td></tr>
-  </table>
-</section>
+          <div class="step">
+            <div class="step-title">Verify it works</div>
+            <div class="codeblock">
+              <div class="codeblock-header">
+                <span>bash</span>
+                <button class="copy-btn" data-copy>Copy</button>
+              </div>
+              <pre><span class="tk-f">curl</span> -s http://127.0.0.1:8787/v1/chat/completions \
+  -H <span class="tk-s">"Authorization: Bearer sk-cpb-…"</span> \
+  -H <span class="tk-s">"Content-Type: application/json"</span> \
+  -d <span class="tk-s">'{"model":"kimi-k3","messages":[{"role":"user","content":"hi"}]}'</span></pre>
+            </div>
+          </div>
+        </div>
 
-<!-- Config -->
-<section>
-  <h2>Configuration</h2>
-  <table>
-    <tr><th>Variable</th><th>Default</th><th>Notes</th></tr>
-    <tr><td>API_KEYS</td><td>—</td><td>Comma-separated keys. Required.</td></tr>
-    <tr><td>HOST / PORT</td><td>127.0.0.1:8787</td><td>Bind address</td></tr>
-    <tr><td>PROVIDERS_JSON_PATH</td><td>~/.cline/…/providers.json</td><td>Credential store</td></tr>
-    <tr><td>SYNC_PROVIDERS_JSON</td><td>true</td><td>Write tokens back to CLI store</td></tr>
-    <tr><td>CLINE_ACCESS_TOKEN</td><td>—</td><td>Manual override (no CLI)</td></tr>
-    <tr><td>CLINE_REFRESH_TOKEN</td><td>—</td><td>Required for server deploys</td></tr>
-  </table>
-</section>
+        <div class="callout tip">
+          <span class="callout-icon">✅</span>
+          <div>Got a JSON reply with <code>"choices"</code>? You're live. Point any OpenAI-compatible tool at <code>http://127.0.0.1:8787/v1</code>.</div>
+        </div>
+      </section>
 
-<!-- Deploy -->
-<section>
-  <h2>Deploy</h2>
-  
-  <h3>Docker</h3>
-  <pre><code>docker build -t clinepass-bridge .
-docker run -d -p 8787:8080 --name clinepass-bridge \
+      <!-- Authentication -->
+      <section id="authentication" class="reveal">
+        <h2>Authentication</h2>
+        <p>The bridge resolves a valid Cline access token in this order:</p>
+        <ol>
+          <li>In-memory token (fastest)</li>
+          <li>Bridge-local cache file (<code>.cache/tokens.json</code>)</li>
+          <li>Cline CLI credential store (<code>~/.cline/data/settings/providers.json</code>)</li>
+          <li>Environment override (<code>CLINE_ACCESS_TOKEN</code>)</li>
+          <li>WorkOS <code>refresh_token</code> grant (single-flight, persisted)</li>
+        </ol>
+
+        <div class="callout info">
+          <span class="callout-icon">🔑</span>
+          <div>When a token is refreshed, it's written back to <strong>both</strong> the bridge cache <em>and</em> the Cline CLI store, keeping CLI + bridge in sync.</div>
+        </div>
+      </section>
+
+      <!-- Integrations -->
+      <section id="integrations" class="reveal">
+        <h2>Integrations</h2>
+        <p>Any OpenAI-compatible client works. Set the base URL and your <code>sk-cpb-…</code> key.</p>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Tool</th><th>Base URL</th><th>API Key</th></tr>
+            <tr><td>Cursor</td><td>http://127.0.0.1:8787/v1</td><td>sk-cpb-…</td></tr>
+            <tr><td>Continue.dev</td><td>http://127.0.0.1:8787/v1</td><td>sk-cpb-…</td></tr>
+            <tr><td>LibreChat</td><td>http://127.0.0.1:8787/v1</td><td>sk-cpb-…</td></tr>
+            <tr><td>Aider</td><td>http://127.0.0.1:8787/v1</td><td>sk-cpb-…</td></tr>
+            <tr><td>OpenAI SDK</td><td>http://127.0.0.1:8787/v1</td><td>sk-cpb-…</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <!-- SDK Examples -->
+      <section id="sdk" class="reveal">
+        <h2>SDK Examples</h2>
+
+        <div class="codeblock">
+          <div class="tabs">
+            <button class="tab active" data-tab="py">Python</button>
+            <button class="tab" data-tab="ts">TypeScript</button>
+            <button class="tab" data-tab="curl">curl</button>
+          </div>
+          <div class="tab-content active" data-tab-content="py">
+            <pre><span class="tk-k">from</span> openai <span class="tk-k">import</span> OpenAI
+
+client = OpenAI(
+    base_url=<span class="tk-s">"http://127.0.0.1:8787/v1"</span>,
+    api_key=<span class="tk-s">"sk-cpb-…"</span>
+)
+
+res = client.chat.completions.create(
+    model=<span class="tk-s">"kimi-k3"</span>,
+    messages=[{<span class="tk-s">"role"</span>: <span class="tk-s">"user"</span>, <span class="tk-s">"content"</span>: <span class="tk-s">"hello"</span>}]
+)
+<span class="tk-f">print</span>(res.choices[<span class="tk-n">0</span>].message.content)</pre>
+          </div>
+          <div class="tab-content" data-tab-content="ts">
+            <pre><span class="tk-k">import</span> OpenAI <span class="tk-k">from</span> <span class="tk-s">"openai"</span>;
+
+<span class="tk-k">const</span> client = <span class="tk-k">new</span> OpenAI({
+  baseURL: <span class="tk-s">"http://127.0.0.1:8787/v1"</span>,
+  apiKey: <span class="tk-s">"sk-cpb-…"</span>,
+});
+
+<span class="tk-k">const</span> res = <span class="tk-k">await</span> client.chat.completions.create({
+  model: <span class="tk-s">"glm-5.2"</span>,
+  messages: [{ role: <span class="tk-s">"user"</span>, content: <span class="tk-s">"hello"</span> }],
+});
+console.<span class="tk-f">log</span>(res.choices[<span class="tk-n">0</span>].message.content);</pre>
+          </div>
+          <div class="tab-content" data-tab-content="curl">
+            <pre><span class="tk-f">curl</span> -s http://127.0.0.1:8787/v1/chat/completions \
+  -H <span class="tk-s">"Authorization: Bearer sk-cpb-…"</span> \
+  -H <span class="tk-s">"Content-Type: application/json"</span> \
+  -d <span class="tk-s">'{
+    "model": "kimi-k3",
+    "messages": [{"role":"user","content":"hello"}]
+  }'</span></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Streaming -->
+      <section id="streaming" class="reveal">
+        <h2>Streaming</h2>
+        <p>Add <code>"stream": true</code> to any request — the bridge passes SSE through verbatim.</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header">
+            <span>streaming.py</span>
+            <button class="copy-btn" data-copy>Copy</button>
+          </div>
+          <pre><span class="tk-k">from</span> openai <span class="tk-k">import</span> OpenAI
+
+client = OpenAI(base_url=<span class="tk-s">"http://127.0.0.1:8787/v1"</span>, api_key=<span class="tk-s">"sk-cpb-…"</span>)
+
+stream = client.chat.completions.create(
+    model=<span class="tk-s">"kimi-k3"</span>,
+    messages=[{<span class="tk-s">"role"</span>: <span class="tk-s">"user"</span>, <span class="tk-s">"content"</span>: <span class="tk-s">"count to 10"</span>}],
+    stream=<span class="tk-k">True</span>,
+)
+
+<span class="tk-k">for</span> chunk <span class="tk-k">in</span> stream:
+    <span class="tk-f">print</span>(chunk.choices[<span class="tk-n">0</span>].delta.content <span class="tk-k">or</span> <span class="tk-s">""</span>, end=<span class="tk-s">""</span>)</pre>
+        </div>
+
+        <div class="callout warn">
+          <span class="callout-icon">⚠️</span>
+          <div><strong>Serverless warning:</strong> avoid Vercel / Netlify for streaming — their function timeouts kill long SSE connections. Use Railway, Fly.io, or a VPS.</div>
+        </div>
+      </section>
+
+      <!-- Models -->
+      <section id="models" class="reveal">
+        <h2>Models</h2>
+        <p>All 11 Cline Pass models. Use the short alias or the full <code>cline-pass/…</code> ID.</p>
+
+        <div class="model-grid">
+          <div class="model-card"><div class="model-name">kimi-k3</div><div class="model-ctx">1M ctx</div></div>
+          <div class="model-card"><div class="model-name">glm-5.2</div><div class="model-ctx">1M ctx</div></div>
+          <div class="model-card"><div class="model-name">deepseek-v4-pro</div><div class="model-ctx">1M ctx</div></div>
+          <div class="model-card"><div class="model-name">deepseek-v4-flash</div><div class="model-ctx">1M ctx</div></div>
+          <div class="model-card"><div class="model-name">mimo-v2.5-pro</div><div class="model-ctx">1M ctx</div></div>
+          <div class="model-card"><div class="model-name">mimo-v2.5</div><div class="model-ctx">1M ctx</div></div>
+          <div class="model-card"><div class="model-name">minimax-m3</div><div class="model-ctx">1M ctx</div></div>
+          <div class="model-card"><div class="model-name">qwen3.7-max</div><div class="model-ctx">256K ctx</div></div>
+          <div class="model-card"><div class="model-name">qwen3.7-plus</div><div class="model-ctx">256K ctx</div></div>
+          <div class="model-card"><div class="model-name">kimi-k2.7-code</div><div class="model-ctx">256K ctx</div></div>
+          <div class="model-card"><div class="model-name">kimi-k2.6</div><div class="model-ctx">256K ctx</div></div>
+        </div>
+      </section>
+
+      <!-- API Reference -->
+      <section id="api" class="reveal">
+        <h2>API Reference</h2>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Endpoint</th><th>Status</th><th>Notes</th></tr>
+            <tr><td>POST /v1/chat/completions</td><td><span class="badge ok">ready</span></td><td>Streaming + non-streaming</td></tr>
+            <tr><td>GET /v1/models</td><td><span class="badge ok">ready</span></td><td>11 models + aliases</td></tr>
+            <tr><td>GET /health</td><td><span class="badge ok">ready</span></td><td>Health check</td></tr>
+            <tr><td>POST /v1/embeddings</td><td><span class="badge no">not planned</span></td><td>Not supported upstream</td></tr>
+            <tr><td>/v1/images/*, /v1/audio/*</td><td><span class="badge no">not planned</span></td><td>Not supported upstream</td></tr>
+            <tr><td>/v1/assistants, /v1/responses</td><td><span class="badge no">not planned</span></td><td>Not supported upstream</td></tr>
+          </table>
+        </div>
+
+        <div class="callout info">
+          <span class="callout-icon">🛠️</span>
+          <div><strong>Tool calling:</strong> forwarded verbatim. Works if the upstream model supports it — the bridge adds nothing of its own.</div>
+        </div>
+      </section>
+
+      <!-- Configuration -->
+      <section id="config" class="reveal">
+        <h2>Configuration</h2>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Variable</th><th>Default</th><th>Notes</th></tr>
+            <tr><td>API_KEYS</td><td>—</td><td>Comma-separated keys. <strong>Required.</strong></td></tr>
+            <tr><td>HOST</td><td>127.0.0.1</td><td>Bind address</td></tr>
+            <tr><td>PORT</td><td>8787</td><td>Listen port</td></tr>
+            <tr><td>PROVIDERS_JSON_PATH</td><td>~/.cline/…/providers.json</td><td>CLI credential store</td></tr>
+            <tr><td>SYNC_PROVIDERS_JSON</td><td>true</td><td>Write refreshed tokens back to CLI store</td></tr>
+            <tr><td>CLINE_ACCESS_TOKEN</td><td>—</td><td>Manual override (no CLI)</td></tr>
+            <tr><td>CLINE_REFRESH_TOKEN</td><td>—</td><td>Required for server deploys</td></tr>
+            <tr><td>REQUEST_TIMEOUT_MS</td><td>300000</td><td>Upstream timeout (5 min)</td></tr>
+          </table>
+        </div>
+      </section>
+
+      <!-- Deploy -->
+      <section id="deploy" class="reveal">
+        <h2>Deploy</h2>
+
+        <h3>Docker</h3>
+        <div class="codeblock">
+          <div class="codeblock-header">
+            <span>bash</span>
+            <button class="copy-btn" data-copy>Copy</button>
+          </div>
+          <pre><span class="tk-f">docker</span> build -t clinepass-bridge .
+<span class="tk-f">docker</span> run -d -p 8787:8080 --name clinepass-bridge \
   -e HOST=0.0.0.0 -e PORT=8080 \
-  -e API_KEYS=*** \
-  -e CLINE_REFRESH_TOKEN=*** \
+  -e API_KEYS=sk-cpb-… \
+  -e CLINE_REFRESH_TOKEN=… \
   -v clinepass-cache:/app/.cache \
-  clinepass-bridge</code></pre>
+  clinepass-bridge</pre>
+        </div>
 
-  <h3>Fly.io</h3>
-  <pre><code>fly launch --no-deploy
-fly secrets set \
-  API_KEYS=*** \
-  CLINE_REFRESH_TOKEN=*** deploy</code></pre>
+        <h3>Fly.io</h3>
+        <div class="codeblock">
+          <div class="codeblock-header">
+            <span>bash</span>
+            <button class="copy-btn" data-copy>Copy</button>
+          </div>
+          <pre><span class="tk-f">fly</span> launch --no-deploy
+<span class="tk-f">fly</span> secrets set \
+  API_KEYS=sk-cpb-… \
+  CLINE_REFRESH_TOKEN=…
+<span class="tk-f">fly</span> deploy</pre>
+        </div>
 
-  <p><span class="warn">⚠</span> Avoid serverless (Vercel/Netlify) — timeouts kill LLM streaming.</p>
-</section>
+        <h3>Railway</h3>
+        <p>Railway auto-detects the <code>Dockerfile</code>. Connect the repo, set env vars, mount a volume at <code>/app/.cache</code>.</p>
 
-<!-- Troubleshooting -->
-<section>
-  <h2>Troubleshooting</h2>
-  <table>
-    <tr><th>Symptom</th><th>Fix</th></tr>
-    <tr><td>apiKeysConfigured: 0</td><td>.env not loaded. Make sure API_KEYS is set.</td></tr>
-    <tr><td>No refresh token available</td><td>Sign in with Cline CLI once, or set CLINE_REFRESH_TOKEN.</td></tr>
-    <tr><td>Streaming cuts off</td><td>Don't use serverless. Use a VM (Railway, Fly.io, VPS).</td></tr>
-    <tr><td>Port already in use</td><td>Change PORT or kill existing: lsof -ti:8787 | xargs kill</td></tr>
-    <tr><td>401/403 from upstream</td><td>Token expired. Sign in with Cline CLI again.</td></tr>
-    <tr><td>connection refused</td><td>Bridge not running. npm run dev first.</td></tr>
-  </table>
-</section>
+        <div class="callout danger">
+          <span class="callout-icon">🚫</span>
+          <div><strong>Don't use Vercel or Netlify</strong> — their request timeouts kill LLM streaming. Use a VM-style host.</div>
+        </div>
+      </section>
+
+      <!-- Troubleshooting -->
+      <section id="troubleshooting" class="reveal">
+        <h2>Troubleshooting</h2>
+
+        <div class="table-wrap">
+          <table>
+            <tr><th>Symptom</th><th>Fix</th></tr>
+            <tr><td>apiKeysConfigured: 0</td><td>.env not loaded. Make sure API_KEYS is set.</td></tr>
+            <tr><td>No refresh token available</td><td>Sign in with Cline CLI once, or set CLINE_REFRESH_TOKEN.</td></tr>
+            <tr><td>Streaming cuts off</td><td>Don't use serverless. Use a VM (Railway, Fly.io, VPS).</td></tr>
+            <tr><td>Port already in use</td><td>Change PORT or kill existing: lsof -ti:8787 | xargs kill</td></tr>
+            <tr><td>401 / 403 from upstream</td><td>Token expired. Sign in with Cline CLI again.</td></tr>
+            <tr><td>connection refused</td><td>Bridge not running. npm run dev first.</td></tr>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+    <footer>
+      <a href="https://github.com/mocasus/clinepass-bridge">GitHub</a> · MIT License<br>
+      <span style="font-size:12px">Not affiliated with Cline Bot Inc. For personal, low-volume use.</span>
+    </footer>
+  </main>
+
+  <!-- ============ TOC ============ -->
+  <aside class="toc">
+    <div class="toc-title">On this page</div>
+    <a href="#introduction" class="toc-link">Introduction</a>
+    <a href="#quickstart" class="toc-link">Quick Start</a>
+    <a href="#authentication" class="toc-link">Authentication</a>
+    <a href="#integrations" class="toc-link">Integrations</a>
+    <a href="#sdk" class="toc-link">SDK Examples</a>
+    <a href="#streaming" class="toc-link">Streaming</a>
+    <a href="#models" class="toc-link">Models</a>
+    <a href="#api" class="toc-link">API Reference</a>
+    <a href="#config" class="toc-link">Configuration</a>
+    <a href="#deploy" class="toc-link">Deploy</a>
+    <a href="#troubleshooting" class="toc-link">Troubleshooting</a>
+  </aside>
 
 </div>
 
-<footer>
-  <a href="https://github.com/mocasus/clinepass-bridge">GitHub</a> · MIT License<br>
-  <span style="color:var(--border)">Not affiliated with Cline Bot Inc. For personal, low-volume use.</span>
-</footer>
+<script>
+// ===== Reveal on scroll =====
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// ===== Copy buttons =====
+document.querySelectorAll('[data-copy]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const block = btn.closest('.codeblock');
+    const pre = block.querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 1500);
+    });
+  });
+});
+
+// ===== Tabs =====
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const target = tab.dataset.tab;
+    const parent = tab.closest('.codeblock');
+    parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    parent.querySelector(`[data-tab-content="${target}"]`).classList.add('active');
+  });
+});
+
+// ===== Active nav highlight =====
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.sidebar-link[href^="#"]');
+const tocLinks = document.querySelectorAll('.toc-link');
+
+const highlightIO = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+      navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${id}`));
+      tocLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${id}`));
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => highlightIO.observe(s));
+</script>
 
 </body>
 </html>
