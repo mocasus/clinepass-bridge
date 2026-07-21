@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen)](package.json)
+[![Powered by Cline](https://img.shields.io/badge/Powered%20by-Cline-3B82F6?logo=cline&logoColor=white)](https://github.com/cline/cline)
 
 > **Repo:** https://github.com/mocasus/clinepass-bridge
 
@@ -68,6 +69,10 @@ cd clinepass-bridge
 npm install
 npm run genkey            # → prints a fresh sk-cpb-… key
 ```
+
+> Already have the folder locally? Skip `git clone` — just `cd clinepass-bridge`
+> and run `npm install`. (Cloning into an existing, non-empty dir fails with
+> `destination path already exists`, which is expected.)
 
 Copy `.env.example` to `.env` (`copy` on Windows, `cp` on macOS/Linux) and paste
 the key:
