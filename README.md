@@ -34,23 +34,90 @@ any tool that speaks the OpenAI API — Cursor, Continue.dev, LibreChat, the `op
 
 ## Quick start
 
+**Prerequisite:** sign in with the **Cline CLI** (or VS Code extension) at least
+once, so your credentials exist at `~/.cline/data/settings/providers.json`.
+The bridge reads that file — nothing else to configure.
+
+### 1. Install
+
 ```bash
+git clone https://github.com/mocasus/clinepass-bridge.git
+cd clinepass-bridge
 npm install
-npm run genkey            # prints a fresh sk-cpb-... key
-cp .env.example .env      # paste the key into API_KEYS
-npm run dev               # http://127.0.0.1:8787
 ```
 
-Test it:
+### 2. Create your `.env`
+
+**Windows (PowerShell / CMD):**
+
+```powershell
+copy .env.example .env
+```
+
+**macOS / Linux:**
 
 ```bash
+cp .env.example .env
+```
+
+### 3. Generate an API key and put it in `.env`
+
+```bash
+npm run genkey
+```
+
+Copy the printed `sk-cpb-…` value, then open `.env` and set:
+
+```ini
+API_KEYS=sk-cpb-…
+```
+
+> 💡 Multiple keys? Separate with commas: `API_KEYS=sk-cpb-aaa,sk-cpb-bbb`
+
+### 4. Run it
+
+```bash
+npm run dev          # dev mode (auto-reload)  → http://127.0.0.1:8787
+# or, production:
+npm run build && npm start
+```
+
+You should see a single-line JSON log like:
+
+```json
+{"level":"info","time":"2026-07-22T00:00:00.000Z","msg":"clinepass-bridge listening","url":"http://127.0.0.1:8787","providersJson":"~/.cline/data/settings/providers.json","apiKeysConfigured":1}
+```
+
+> Logs are emitted as one-line JSON so they're easy to pipe/parse. The `time`
+> and `providersJson` values differ on your machine, and `apiKeysConfigured`
+> matches the number of keys you set in `API_KEYS`. If you instead see a `warn`
+> about empty `API_KEYS` and `apiKeysConfigured:0`, your `.env` wasn't picked up
+> — go back to Step 3.
+
+### 5. Verify it works
+
+```bash
+# should return the 11-model catalog
 curl http://127.0.0.1:8787/v1/models -H "Authorization: Bearer sk-cpb-…"
 
-curl http://127.0.0.1:8787/v1/chat/completions \
-  -H "Authorization: Bearer sk-cpb-…" \
-  -H "Content-Type: application/json" \
-  -d '{"model":"kimi-k3","messages":[{"role":"user","content":"hi"}]}'
+# a real chat completion
+curl http://127.0.0.1:8787/v1/chat/completions ^
+  -H "Authorization: Bearer sk-cpb-…" ^
+  -H "Content-Type: application/json" ^
+  -d "{\"model\":\"kimi-k3\",\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}]}"
 ```
+
+> On **macOS/Linux** use `\` line-continuations and single quotes:
+>
+> ```bash
+> curl http://127.0.0.1:8787/v1/chat/completions \
+>   -H "Authorization: Bearer sk-cpb-…" \
+>   -H "Content-Type: application/json" \
+>   -d '{"model":"kimi-k3","messages":[{"role":"user","content":"hi"}]}'
+> ```
+
+✅ Got a JSON reply with `"choices"`? The bridge is working. Point your tools at
+`http://127.0.0.1:8787/v1` with your `sk-cpb-…` key.
 
 ## Use with your favorite tools
 
