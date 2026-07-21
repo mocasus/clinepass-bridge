@@ -32,91 +32,82 @@ any tool that speaks the OpenAI API — Cursor, Continue.dev, LibreChat, the `op
 - ✅ Your own API keys (`sk-cpb-…`), multiple supported
 - ✅ Retries once on `401/403` with a force-refreshed token
 
+## OpenAI API compatibility
+
+The bridge implements the **Chat Completions** surface and forwards every request
+field through to `api.cline.bot` unchanged (only `model` is remapped), so
+anything the upstream honors — `temperature`, `max_tokens`, `tools`,
+`tool_choice`, `response_format`, `seed`, … — works transparently.
+
+| Endpoint | Status | Notes |
+|---|---|---|
+| `POST /v1/chat/completions` | ✅ | streaming (SSE) + non-streaming; body passed through |
+| `GET /v1/models` | ✅ | 11 Cline Pass models + short aliases |
+| `GET /health` | ✅ | deploy health checks |
+| `/v1/embeddings` | ❌ | not implemented |
+| `/v1/images/*`, `/v1/audio/*` | ❌ | not implemented |
+| `/v1/assistants`, `/v1/threads`, `/v1/messages` | ❌ | Assistants API not implemented |
+| `/v1/responses` | ❌ | Responses API not implemented |
+
+**Tool / function calling:** the request body is forwarded verbatim, so it works
+**if the upstream model supports it** — the bridge adds nothing of its own.
+
+This covers any client that only needs Chat Completions: Cursor, Continue.dev,
+LibreChat, Aider, the `openai` SDK, `curl`, and most coding extensions. Clients
+that need embeddings / images / Assistants won't work.
+
 ## Quick start
 
-**Prerequisite:** sign in with the **Cline CLI** (or VS Code extension) at least
-once, so your credentials exist at `~/.cline/data/settings/providers.json`.
-The bridge reads that file — nothing else to configure.
-
-### 1. Install
+**Prerequisite:** sign in with the **Cline CLI** (or VS Code extension) once so
+your credentials land in `~/.cline/data/settings/providers.json`. The bridge
+reads that file — nothing else to configure.
 
 ```bash
 git clone https://github.com/mocasus/clinepass-bridge.git
 cd clinepass-bridge
 npm install
+npm run genkey            # → prints a fresh sk-cpb-… key
 ```
 
-### 2. Create your `.env`
-
-**Windows (PowerShell / CMD):**
-
-```powershell
-copy .env.example .env
-```
-
-**macOS / Linux:**
-
-```bash
-cp .env.example .env
-```
-
-### 3. Generate an API key and put it in `.env`
-
-```bash
-npm run genkey
-```
-
-Copy the printed `sk-cpb-…` value, then open `.env` and set:
+Copy `.env.example` to `.env` (`copy` on Windows, `cp` on macOS/Linux) and paste
+the key:
 
 ```ini
-API_KEYS=sk-cpb-…
+API_KEYS=sk-cpb-…         # several? comma-separate: sk-cpb-aaa,sk-cpb-bbb
 ```
 
-> 💡 Multiple keys? Separate with commas: `API_KEYS=sk-cpb-aaa,sk-cpb-bbb`
-
-### 4. Run it
+Start the server:
 
 ```bash
-npm run dev          # dev mode (auto-reload)  → http://127.0.0.1:8787
-# or, production:
-npm run build && npm start
+npm run dev               # dev (auto-reload)  →  http://127.0.0.1:8787
+# production:  npm run build && npm start
 ```
 
-You should see a single-line JSON log like:
+On boot you'll see a one-line JSON log:
 
 ```json
 {"level":"info","time":"2026-07-22T00:00:00.000Z","msg":"clinepass-bridge listening","url":"http://127.0.0.1:8787","providersJson":"~/.cline/data/settings/providers.json","apiKeysConfigured":1}
 ```
 
-> Logs are emitted as one-line JSON so they're easy to pipe/parse. The `time`
-> and `providersJson` values differ on your machine, and `apiKeysConfigured`
-> matches the number of keys you set in `API_KEYS`. If you instead see a `warn`
-> about empty `API_KEYS` and `apiKeysConfigured:0`, your `.env` wasn't picked up
-> — go back to Step 3.
+> Logs are one-line JSON for easy piping. `apiKeysConfigured` equals the number
+> of keys you set; if it's `0` with a `warn` about empty `API_KEYS`, your `.env`
+> wasn't loaded.
 
-### 5. Verify it works
+Verify it works:
 
 ```bash
-# should return the 11-model catalog
 curl http://127.0.0.1:8787/v1/models -H "Authorization: Bearer sk-cpb-…"
-
-# a real chat completion
-curl http://127.0.0.1:8787/v1/chat/completions ^
-  -H "Authorization: Bearer sk-cpb-…" ^
-  -H "Content-Type: application/json" ^
-  -d "{\"model\":\"kimi-k3\",\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}]}"
+curl http://127.0.0.1:8787/v1/chat/completions \
+  -H "Authorization: Bearer sk-cpb-…" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"kimi-k3","messages":[{"role":"user","content":"hi"}]}'
 ```
 
-> On **macOS/Linux** use `\` line-continuations and single quotes:
->
-> ```bash
-> curl http://127.0.0.1:8787/v1/chat/completions \
->   -H "Authorization: Bearer sk-cpb-…" \
->   -H "Content-Type: application/json" \
->   -d '{"model":"kimi-k3","messages":[{"role":"user","content":"hi"}]}'
-> ```
+> On **Windows CMD** swap `\` for `^` line-continuations and escape the quotes:
+> `-d "{\"model\":\"kimi-k3\",\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}]}"`
+> (PowerShell just needs normal quoting.)
 
-✅ Got a JSON reply with `"choices"`? The bridge is working. Point your tools at
+✅ Got a JSON reply with `"choices"`? You're live. Point any tool at
 `http://127.0.0.1:8787/v1` with your `sk-cpb-…` key.
 
 ## Use with your favorite tools
@@ -162,28 +153,40 @@ See `.env.example`. The essentials:
 | `SYNC_PROVIDERS_JSON` | `true` | Write refreshed tokens back into the CLI store. |
 | `CLINE_ACCESS_TOKEN` / `CLINE_REFRESH_TOKEN` | — | Manual override (server deploys without the CLI). |
 
-**Running on a server?** Set `CLINE_REFRESH_TOKEN` (grab it from your local
-`providers.json` → `providers.cline.settings.auth.refreshToken`) and optionally
-`CLINE_ACCESS_TOKEN`. The bridge refreshes from there and keeps its own cache in
-`.cache/tokens.json`.
+**Running on a server?** See [Deploy](#deploy) — set `CLINE_REFRESH_TOKEN` and
+`SYNC_PROVIDERS_JSON=false`, and mount a volume at `.cache/`.
 
-## Docker
+## Deploy
+
+One codebase for local **and** production — only the env vars differ. On a
+server set `HOST=0.0.0.0`, provide `API_KEYS` and `CLINE_REFRESH_TOKEN` (grab it
+from your local `providers.json` → `providers.cline.settings.auth.refreshToken`),
+and set `SYNC_PROVIDERS_JSON=false` (no Cline CLI store on the server). The
+bridge caches rotated tokens in `.cache/tokens.json` — mount a **persistent
+volume** there so they survive redeploys.
+
+### Railway
+
+Railway auto-detects the repo's `Dockerfile` — connect the GitHub repo, then set
+these variables (Railway injects `PORT` for you and hands you a public domain +
+TLS):
+
+| Variable | Value |
+|---|---|
+| `HOST` | `0.0.0.0` |
+| `API_KEYS` | `sk-cpb-…` |
+| `CLINE_REFRESH_TOKEN` | from your local `providers.json` |
+| `SYNC_PROVIDERS_JSON` | `false` |
+
+Add a persistent volume mounted at `/app/.cache` so `.cache/tokens.json`
+survives redeploys.
+
+### Fly.io
+
+A ready `fly.toml` ships in the repo.
 
 ```bash
-docker build -t clinepass-bridge .
-docker run --rm -p 8787:8080 \
-  -e HOST=0.0.0.0 -e PORT=8080 \
-  -e API_KEYS=sk-cpb-… \
-  -e CLINE_REFRESH_TOKEN=… \
-  clinepass-bridge
-```
-
-## Deploy to Fly.io
-
-The repo ships a ready `fly.toml`.
-
-```bash
-fly launch --no-deploy          # creates the app (uses fly.toml)
+fly launch --no-deploy
 fly secrets set \
   API_KEYS=sk-cpb-… \
   CLINE_ACCESS_TOKEN=workos:eyJ… \
@@ -192,9 +195,20 @@ fly deploy
 fly open                        # https://clinepass-bridge.fly.dev
 ```
 
-> **Note:** a long-running HTTP server doesn't fit serverless platforms
-> (Vercel/Netlify) — their request timeouts kill LLM streaming. Use a VM-style
-> host (Fly.io, Railway, Render) or run it locally.
+### Docker (any VPS)
+
+```bash
+docker build -t clinepass-bridge .
+docker run -d -p 8787:8080 --name clinepass-bridge \
+  -e HOST=0.0.0.0 -e PORT=8080 \
+  -e API_KEYS=sk-cpb-… \
+  -e CLINE_REFRESH_TOKEN=… \
+  -v clinepass-cache:/app/.cache \
+  clinepass-bridge
+```
+
+> **Avoid serverless platforms** (Vercel/Netlify) — their request timeouts kill
+> LLM streaming. Use a VM-style host (Railway, Fly.io, Render) or run it locally.
 
 ## Models
 
