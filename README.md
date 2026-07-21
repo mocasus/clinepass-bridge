@@ -101,11 +101,39 @@ On boot you'll see a one-line JSON log:
 Verify it works:
 
 ```bash
-curl http://127.0.0.1:8787/v1/models -H "Authorization: Bearer sk-cpb-…"
-curl http://127.0.0.1:8787/v1/chat/completions \
+# List models
+curl -s http://127.0.0.1:8787/v1/models \
+  -H "Authorization: Bearer sk-cpb-…"
+
+# Chat completion (non-streaming)
+curl -s http://127.0.0.1:8787/v1/chat/completions \
   -H "Authorization: Bearer sk-cpb-…" \
   -H "Content-Type: application/json" \
   -d '{"model":"kimi-k3","messages":[{"role":"user","content":"hi"}]}'
+
+# Stream (add "stream": true)
+curl -s http://127.0.0.1:8787/v1/chat/completions \
+  -H "Authorization: Bearer sk-cpb-…" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"kimi-k3","messages":[{"role":"user","content":"tell me a joke"}],"stream":true}'
+```
+
+Expected response (non-streaming):
+
+```json
+{
+  "id": "chatcmpl-…",
+  "object": "chat.completion",
+  "model": "kimi-k3",
+  "choices": [
+    {
+      "index": 0,
+      "message": { "role": "assistant", "content": "Hello! How can I help?" },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": { "prompt_tokens": 10, "completion_tokens": 8, "total_tokens": 18 }
+}
 ```
 
 > On **Windows CMD** swap `\` for `^` line-continuations and escape the quotes:
@@ -217,10 +245,19 @@ docker run -d -p 8787:8080 --name clinepass-bridge \
 
 ## Models
 
-`cline-pass/deepseek-v4-flash` · `cline-pass/deepseek-v4-pro` · `cline-pass/glm-5.2` ·
-`cline-pass/kimi-k2.6` · `cline-pass/kimi-k2.7-code` · `cline-pass/kimi-k3` ·
-`cline-pass/mimo-v2.5` · `cline-pass/mimo-v2.5-pro` · `cline-pass/minimax-m3` ·
-`cline-pass/qwen3.7-max` · `cline-pass/qwen3.7-plus`
+| Model ID | Context | Aliases |
+|---|---|---|
+| `cline-pass/kimi-k3` | 1,048,576 | `kimi-k3` |
+| `cline-pass/glm-5.2` | 1,048,576 | `glm-5.2` |
+| `cline-pass/deepseek-v4-pro` | 1,048,576 | `deepseek-v4-pro` |
+| `cline-pass/deepseek-v4-flash` | 1,048,576 | `deepseek-v4-flash` |
+| `cline-pass/mimo-v2.5-pro` | 1,048,576 | `mimo-v2.5-pro` |
+| `cline-pass/mimo-v2.5` | 1,048,576 | `mimo-v2.5` |
+| `cline-pass/minimax-m3` | 1,048,576 | `minimax-m3` |
+| `cline-pass/qwen3.7-max` | 262,144 | `qwen3.7-max` |
+| `cline-pass/qwen3.7-plus` | 262,144 | `qwen3.7-plus` |
+| `cline-pass/kimi-k2.7-code` | 262,144 | `kimi-k2.7-code` |
+| `cline-pass/kimi-k2.6` | 262,144 | `kimi-k2.6` |
 
 Short aliases (`kimi-k3`, `glm-5.2`, …) resolve automatically.
 
@@ -231,6 +268,21 @@ npm test          # vitest (36 tests)
 npm run build     # tsc → dist/
 npm start         # run the built server
 ```
+
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `apiKeysConfigured: 0` | `.env` not loaded | Make sure `.env` is in project root and `API_KEYS` is set |
+| `No refresh token available` | No Cline CLI login | Run `npx cline` and sign in once, or set `CLINE_REFRESH_TOKEN` |
+| Streaming cuts off mid-response | Serverless platform timeout | Use a VM (Railway, Fly.io, VPS). Don't use Vercel/Netlify |
+| `Port already in use` | Another process on the port | Change `PORT` in `.env` or `lsof -ti:8787 \| xargs kill` |
+| `401` / `403` from upstream | Token expired and refresh failed | Check `providers.json` path; sign in with Cline CLI again |
+| `connection refused` | Bridge not running | Run `npm run dev` first, verify with `curl /health` |
+
+## Docs site
+
+Full documentation with interactive examples at **[clinepass-bridge.pages.dev](https://mocasus.github.io/clinepass-bridge/)**.
 
 ## ⚠️ Disclaimer & security
 
