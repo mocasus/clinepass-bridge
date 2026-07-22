@@ -3,27 +3,27 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>clinepass-bridge — Docs</title>
-<meta name="description" content="OpenAI-compatible API bridge for Cline Pass. Use your Cline Pass from any tool.">
+<title>ClinePass Bridge — One Pass. Every Tool.</title>
+<meta name="description" content="OpenAI-compatible API bridge for Cline Pass. Use your Cline Pass from any tool — Cursor, Continue.dev, Aider, LibreChat, or the openai SDK.">
 <link rel="icon" type="image/png" href="./assets/cline-favicon.png">
 <style>
 :root{
   --bg:#0a0a0a;
-  --bg-2:#0f0f10;
+  --bg-2:#0e0e10;
   --panel:#141416;
   --panel-2:#1a1a1d;
-  --border:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.06);
   --border-strong:rgba(255,255,255,.12);
   --text:#fafafa;
   --text-2:#a1a1aa;
-  --text-3:#71717a;
+  --text-3:#6b6b75;
   --purple:#a78bfa;
   --purple-strong:#8b5cf6;
-  --purple-glow:rgba(167,139,250,.15);
+  --purple-glow:rgba(167,139,250,.14);
+  --purple-soft:rgba(167,139,250,.07);
   --green:#4ade80;
   --amber:#fbbf24;
   --red:#f87171;
-  --cyan:#22d3ee;
   --radius:10px;
   --radius-sm:6px;
   --font-sans:'Inter',system-ui,-apple-system,sans-serif;
@@ -40,101 +40,149 @@ body{
 a{color:var(--purple);text-decoration:none}
 a:hover{color:var(--purple-strong)}
 
-/* Layout */
+/* ===== Layout ===== */
 .layout{display:flex;min-height:100vh}
 .sidebar{
-  width:240px;flex-shrink:0;
+  width:264px;flex-shrink:0;
   position:sticky;top:0;height:100vh;overflow-y:auto;
   border-right:1px solid var(--border);
-  padding:24px 16px;
   background:var(--bg-2);
+  display:flex;flex-direction:column;
 }
 .main{flex:1;min-width:0}
 .toc{
   width:200px;flex-shrink:0;
   position:sticky;top:0;height:100vh;overflow-y:auto;
-  padding:24px 16px;font-size:13px;
+  padding:32px 16px;font-size:13px;
 }
 
-/* Sidebar */
+/* ===== Sidebar ===== */
+.sidebar-head{
+  padding:20px 20px 18px;
+  border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,var(--purple-soft) 0%,transparent 100%);
+}
 .sidebar-brand{
+  display:flex;align-items:center;gap:10px;
   font-weight:700;font-size:15px;letter-spacing:-.3px;
-  display:flex;align-items:center;gap:8px;
-  padding:8px 10px;margin-bottom:20px;
+  color:var(--text);
 }
-.sidebar-brand .dot{
-  width:8px;height:8px;border-radius:50%;
-  background:var(--purple);
-  box-shadow:0 0 12px var(--purple);
-  animation:pulse 2s ease-in-out infinite;
+.sidebar-brand img{
+  width:22px;height:23px;
+  filter:drop-shadow(0 0 8px rgba(167,139,250,.5));
 }
-@keyframes pulse{
-  0%,100%{opacity:1;transform:scale(1)}
-  50%{opacity:.6;transform:scale(.85)}
+.sidebar-tagline{
+  margin-top:8px;font-size:12px;color:var(--text-3);
+  font-weight:500;letter-spacing:.2px;
 }
+.sidebar-version{
+  display:inline-block;margin-top:10px;
+  padding:2px 8px;border-radius:10px;
+  background:var(--purple-glow);border:1px solid rgba(167,139,250,.25);
+  font-size:10.5px;font-weight:600;color:var(--purple);
+  font-family:var(--font-mono);
+}
+.sidebar-nav{flex:1;padding:14px 12px;overflow-y:auto}
 .sidebar-section{
-  font-size:11px;font-weight:600;text-transform:uppercase;
-  letter-spacing:1px;color:var(--text-3);
-  padding:0 10px;margin:18px 0 6px;
+  font-size:10.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:1.2px;color:var(--text-3);
+  padding:0 10px;margin:20px 0 6px;
 }
+.sidebar-section:first-child{margin-top:4px}
 .sidebar-link{
-  display:block;padding:6px 10px;border-radius:var(--radius-sm);
+  display:flex;align-items:center;gap:10px;
+  padding:7px 10px;border-radius:var(--radius-sm);
   color:var(--text-2);font-size:13.5px;text-decoration:none;
-  transition:all .15s;
+  transition:all .15s;margin-bottom:1px;
+  border-left:2px solid transparent;
 }
-.sidebar-link:hover{color:var(--text);background:var(--panel)}
+.sidebar-link svg{
+  width:14px;height:14px;flex-shrink:0;
+  stroke:currentColor;fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;
+  opacity:.7;
+}
+.sidebar-link:hover{
+  color:var(--text);background:var(--panel);
+  transform:translateX(2px);
+}
+.sidebar-link:hover svg{opacity:1;color:var(--purple)}
 .sidebar-link.active{
   color:var(--purple);background:var(--purple-glow);
-  border-left:2px solid var(--purple);
-  padding-left:8px;
+  border-left-color:var(--purple);
+  font-weight:600;
 }
+.sidebar-link.active svg{opacity:1;color:var(--purple)}
+.sidebar-foot{
+  padding:14px 20px;
+  border-top:1px solid var(--border);
+  font-size:12px;color:var(--text-3);
+}
+.sidebar-foot a{color:var(--text-2)}
+.sidebar-foot a:hover{color:var(--purple)}
 
-/* TOC */
+/* ===== TOC ===== */
 .toc-title{
   font-size:11px;font-weight:600;text-transform:uppercase;
   letter-spacing:1px;color:var(--text-3);
-  margin-bottom:12px;
+  margin-bottom:14px;
 }
 .toc-link{
-  display:block;padding:4px 0;color:var(--text-3);
+  display:block;padding:4px 0 4px 12px;color:var(--text-3);
   font-size:13px;text-decoration:none;
   border-left:2px solid var(--border);
-  padding-left:12px;margin-left:2px;
   transition:all .15s;
 }
 .toc-link:hover{color:var(--text)}
 .toc-link.active{color:var(--purple);border-left-color:var(--purple)}
-.toc-link.sub{padding-left:24px}
 
-/* Main content */
+/* ===== Content ===== */
 .content{
-  max-width:760px;padding:48px 48px 120px;
+  max-width:780px;padding:48px 48px 120px;
   margin:0 auto;
 }
-.hero{padding:24px 0 48px;border-bottom:1px solid var(--border);margin-bottom:48px}
+.hero{
+  padding:24px 0 48px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:56px;
+}
+.hero-wordmark{margin-bottom:22px;opacity:.92}
+.hero-badges{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 11px;border-radius:12px;
+  background:var(--panel);border:1px solid var(--border);
+  font-size:11.5px;font-weight:600;color:var(--text-2);
+  font-family:var(--font-mono);
+}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
 .hero h1{
-  font-size:38px;font-weight:800;letter-spacing:-1.2px;line-height:1.15;
+  font-size:40px;font-weight:800;letter-spacing:-1.5px;line-height:1.1;
   margin-bottom:14px;
-  background:linear-gradient(135deg,#fff 0%,var(--purple) 100%);
+  background:linear-gradient(135deg,#fff 30%,var(--purple) 100%);
   -webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;
 }
-.hero p{font-size:16.5px;color:var(--text-2);max-width:560px}
+.hero-tagline{
+  font-size:19px;color:var(--text);font-weight:500;
+  margin-bottom:10px;letter-spacing:-.2px;
+}
+.hero p{font-size:15.5px;color:var(--text-2);max-width:600px}
 
 /* Sections */
-section{margin-bottom:64px;scroll-margin-top:24px}
+section{margin-bottom:72px;scroll-margin-top:24px}
 h2{
-  font-size:24px;font-weight:700;letter-spacing:-.5px;
+  font-size:25px;font-weight:700;letter-spacing:-.5px;
   margin-bottom:12px;color:var(--text);
 }
-h3{font-size:17px;font-weight:600;margin:28px 0 10px;color:var(--text)}
+h3{font-size:17px;font-weight:600;margin:30px 0 10px;color:var(--text)}
 p{color:var(--text-2);margin-bottom:14px}
 strong{color:var(--text)}
 ul,ol{color:var(--text-2);margin:8px 0 16px 22px}
 li{margin-bottom:6px}
 
 /* Reveal animation */
-.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .7s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1)}
 .reveal.visible{opacity:1;transform:translateY(0)}
 
 /* Code blocks */
@@ -144,7 +192,9 @@ li{margin-bottom:6px}
   border-radius:var(--radius);
   margin:14px 0;
   overflow:hidden;
+  transition:border-color .2s;
 }
+.codeblock:hover{border-color:var(--border-strong)}
 .codeblock-header{
   display:flex;align-items:center;justify-content:space-between;
   padding:8px 14px;
@@ -164,7 +214,7 @@ li{margin-bottom:6px}
 .copy-btn.copied{color:var(--green);border-color:var(--green)}
 .codeblock pre{
   padding:16px 18px;overflow-x:auto;
-  font-family:var(--font-mono);font-size:13px;line-height:1.7;
+  font-family:var(--font-mono);font-size:13px;line-height:1.75;
 }
 code{font-family:var(--font-mono);font-size:13px}
 :not(pre)>code{
@@ -173,20 +223,14 @@ code{font-family:var(--font-mono);font-size:13px}
   border:1px solid var(--border);
 }
 
-/* Syntax colors */
-.tk-k{color:#c792ea}     /* keyword */
-.tk-s{color:#c3e88d}     /* string */
-.tk-c{color:#546e7a}     /* comment */
-.tk-f{color:#82aaff}     /* function */
-.tk-n{color:#f78c6c}     /* number */
-.tk-v{color:#f07178}     /* variable */
-.tk-o{color:#89ddff}     /* operator */
+/* Syntax */
+.tk-k{color:#c792ea}.tk-s{color:#c3e88d}.tk-c{color:#546e7a}
+.tk-f{color:#82aaff}.tk-n{color:#f78c6c}.tk-v{color:#f07178}
 
 /* Tabs */
 .tabs{
   display:flex;gap:2px;
   border-bottom:1px solid var(--border);
-  margin-bottom:-1px;
   background:var(--panel-2);
   padding:0 12px;
 }
@@ -210,8 +254,8 @@ code{font-family:var(--font-mono);font-size:13px}
   font-size:14px;
   display:flex;gap:12px;align-items:flex-start;
 }
-.callout-icon{font-size:16px;flex-shrink:0;line-height:1.5}
-.callout.info{background:rgba(167,139,250,.07);border-color:rgba(167,139,250,.25);color:#d4d4d8}
+.callout-icon{font-size:15px;flex-shrink:0;line-height:1.5}
+.callout.info{background:var(--purple-soft);border-color:rgba(167,139,250,.25);color:#d4d4d8}
 .callout.warn{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.25);color:#fde68a}
 .callout.tip{background:rgba(74,222,128,.06);border-color:rgba(74,222,128,.25);color:#bbf7d0}
 .callout.danger{background:rgba(248,113,113,.06);border-color:rgba(248,113,113,.25);color:#fecaca}
@@ -244,32 +288,52 @@ tr:hover td{background:rgba(255,255,255,.015)}
 }
 .badge.ok{background:rgba(74,222,128,.12);color:var(--green)}
 .badge.no{background:rgba(248,113,113,.12);color:var(--red)}
-.badge.warn{background:rgba(251,191,36,.12);color:var(--amber)}
-.badge.info{background:rgba(167,139,250,.12);color:var(--purple)}
 
 /* Steps */
-.steps{counter-reset:step;margin:20px 0}
+.steps{counter-reset:step;margin:22px 0}
 .step{
-  position:relative;padding-left:44px;margin-bottom:20px;
+  position:relative;padding-left:46px;margin-bottom:22px;
   counter-increment:step;
 }
 .step::before{
   content:counter(step);
   position:absolute;left:0;top:0;
-  width:28px;height:28px;border-radius:50%;
+  width:30px;height:30px;border-radius:50%;
   background:var(--purple-glow);
   border:1px solid var(--purple);
   color:var(--purple);
   font-size:13px;font-weight:700;
   display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-mono);
 }
 .step::after{
   content:'';
-  position:absolute;left:14px;top:32px;bottom:-8px;
-  width:1px;background:var(--border);
+  position:absolute;left:15px;top:34px;bottom:-10px;
+  width:1px;background:linear-gradient(180deg,var(--border) 0%,transparent 100%);
 }
 .step:last-child::after{display:none}
 .step-title{font-weight:600;font-size:15px;margin-bottom:4px;color:var(--text)}
+
+/* Feature cards */
+.feature-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:12px;margin:18px 0;
+}
+.feature-card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px 20px;
+  transition:all .2s;
+}
+.feature-card:hover{border-color:rgba(167,139,250,.3);transform:translateY(-2px)}
+.feature-card h4{
+  font-size:14px;font-weight:600;margin-bottom:6px;
+  display:flex;align-items:center;gap:8px;
+}
+.feature-card h4 svg{
+  width:15px;height:15px;stroke:var(--purple);fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.feature-card p{font-size:13px;color:var(--text-2);margin:0}
 
 /* Model grid */
 .model-grid{
@@ -283,35 +347,40 @@ tr:hover td{background:rgba(255,255,255,.015)}
 }
 .model-card:hover{border-color:var(--purple);transform:translateY(-2px)}
 .model-name{font-family:var(--font-mono);font-size:13px;font-weight:600;color:var(--text)}
-.model-ctx{font-size:11px;color:var(--text-3);margin-top:2px}
+.model-ctx{font-size:11px;color:var(--text-3);margin-top:2px;font-family:var(--font-mono)}
 
 /* Footer */
 footer{
   border-top:1px solid var(--border);
-  padding:32px 48px;color:var(--text-3);font-size:13px;
+  padding:36px 48px;color:var(--text-3);font-size:13px;
   text-align:center;
 }
+footer img{margin-bottom:14px;opacity:.7}
 
 /* Mobile */
 @media(max-width:1100px){.toc{display:none}}
 @media(max-width:860px){
   .sidebar{
-    position:fixed;left:-240px;z-index:100;
+    position:fixed;left:-264px;z-index:100;
     transition:left .3s;
-    background:var(--bg-2);
   }
   .sidebar.open{left:0;box-shadow:0 0 60px rgba(0,0,0,.7)}
   .content{padding:32px 20px 80px}
-  .hero h1{font-size:28px}
-  .menu-btn{
-    position:fixed;top:16px;left:16px;z-index:101;
-    background:var(--panel);border:1px solid var(--border);
-    color:var(--text);padding:8px 12px;border-radius:6px;
-    cursor:pointer;font-size:18px;
-  }
+  .hero h1{font-size:30px}
+  .menu-btn{display:block}
 }
-.menu-btn{display:none}
-@media(max-width:860px){.menu-btn{display:block}}
+.menu-btn{
+  display:none;
+  position:fixed;top:16px;left:16px;z-index:101;
+  background:var(--panel);border:1px solid var(--border);
+  color:var(--text);padding:8px 12px;border-radius:6px;
+  cursor:pointer;font-size:18px;
+}
+
+/* Scrollbar */
+.sidebar-nav::-webkit-scrollbar{width:6px}
+.sidebar-nav::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
+.sidebar-nav::-webkit-scrollbar-track{background:transparent}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -325,33 +394,73 @@ footer{
 
   <!-- ============ SIDEBAR ============ -->
   <aside class="sidebar">
-    <div class="sidebar-brand">
-      <img src="./assets/cline-icon.svg" alt="Cline" width="20" height="21" style="filter:drop-shadow(0 0 8px rgba(167,139,250,.5))">
-      clinepass-bridge
+    <div class="sidebar-head">
+      <div class="sidebar-brand">
+        <img src="./assets/cline-icon.svg" alt="Cline">
+        ClinePass Bridge
+      </div>
+      <div class="sidebar-tagline">One Pass. Every Tool.</div>
+      <span class="sidebar-version">v0.1.0</span>
     </div>
-    
-    <div class="sidebar-section">Getting Started</div>
-    <a href="#introduction" class="sidebar-link active">Introduction</a>
-    <a href="#quickstart" class="sidebar-link">Quick Start</a>
-    <a href="#authentication" class="sidebar-link">Authentication</a>
-    
-    <div class="sidebar-section">Usage</div>
-    <a href="#integrations" class="sidebar-link">Integrations</a>
-    <a href="#sdk" class="sidebar-link">SDK Examples</a>
-    <a href="#streaming" class="sidebar-link">Streaming</a>
-    
-    <div class="sidebar-section">Reference</div>
-    <a href="#models" class="sidebar-link">Models</a>
-    <a href="#api" class="sidebar-link">API Reference</a>
-    <a href="#config" class="sidebar-link">Configuration</a>
-    
-    <div class="sidebar-section">Operations</div>
-    <a href="#deploy" class="sidebar-link">Deploy</a>
-    <a href="#troubleshooting" class="sidebar-link">Troubleshooting</a>
-    
-    <div class="sidebar-section">Links</div>
-    <a href="https://github.com/mocasus/clinepass-bridge" class="sidebar-link" target="_blank">GitHub ↗</a>
-    <a href="https://github.com/mocasus/clinepass-bridge/blob/main/LICENSE" class="sidebar-link" target="_blank">License</a>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Getting Started</div>
+      <a href="#introduction" class="sidebar-link active">
+        <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Introduction
+      </a>
+      <a href="#quickstart" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Quick Start
+      </a>
+      <a href="#authentication" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+        Authentication
+      </a>
+
+      <div class="sidebar-section">Usage</div>
+      <a href="#integrations" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Integrations
+      </a>
+      <a href="#sdk" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        SDK Examples
+      </a>
+      <a href="#streaming" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Streaming
+      </a>
+
+      <div class="sidebar-section">Reference</div>
+      <a href="#models" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        Models
+      </a>
+      <a href="#api" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        API Reference
+      </a>
+      <a href="#config" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+        Configuration
+      </a>
+
+      <div class="sidebar-section">Operations</div>
+      <a href="#deploy" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
+        Deploy
+      </a>
+      <a href="#troubleshooting" class="sidebar-link">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Troubleshooting
+      </a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <a href="https://github.com/mocasus/clinepass-bridge" target="_blank">GitHub ↗</a> · 
+      <a href="https://github.com/mocasus/clinepass-bridge/blob/main/LICENSE" target="_blank">MIT</a>
+    </div>
   </aside>
 
   <!-- ============ MAIN ============ -->
@@ -360,42 +469,74 @@ footer{
 
       <!-- Hero -->
       <div class="hero reveal">
-        <img src="./assets/cline-wordmark-white.svg" alt="Cline" width="142" height="40" style="margin-bottom:20px;opacity:.9">
-        <h1>clinepass-bridge</h1>
+        <img class="hero-wordmark" src="./assets/cline-wordmark-white.svg" alt="Cline" width="142" height="40">
+        <div class="hero-badges">
+          <span class="hero-badge"><span class="dot"></span>11 models</span>
+          <span class="hero-badge">1M context</span>
+          <span class="hero-badge">SSE streaming</span>
+          <span class="hero-badge">Auto token refresh</span>
+        </div>
+        <h1>ClinePass Bridge</h1>
+        <div class="hero-tagline">One Pass. Every Tool.</div>
         <p>An OpenAI-compatible API bridge that lets you use your <strong>Cline Pass</strong> subscription from any tool — Cursor, Continue.dev, Aider, LibreChat, or the <code>openai</code> SDK.</p>
       </div>
 
       <!-- Introduction -->
       <section id="introduction" class="reveal">
         <h2>Introduction</h2>
-        <p>The bridge sits between your favorite AI tool and <code>api.cline.bot</code>, translating standard OpenAI requests into Cline Pass calls. It handles authentication, token refresh, and streaming — so you never think about credentials.</p>
+        <p>Cline Pass is a subscription that gives you access to top coding models through Cline's own clients. But what if you want to use it in <em>your</em> tools? That's where this bridge comes in — it speaks the OpenAI API on the outside and Cline's internal protocol on the inside.</p>
         
         <div class="codeblock">
           <div class="codeblock-header">
-            <span>architecture.txt</span>
+            <span>architecture</span>
             <button class="copy-btn" data-copy>Copy</button>
           </div>
-          <pre>[ Your tool ]
-   │  OpenAI API + sk-cpb-…
-   ▼
-[ clinepass-bridge ]
-   │  reads ~/.cline/data/settings/providers.json
-   │  auto-refreshes WorkOS tokens
-   ▼
-[ api.cline.bot ]
-   kimi-k3 · glm-5.2 · deepseek-v4-pro · +8 more</pre>
+          <pre>┌────────────────────┐
+│   Your favorite    │
+│   OpenAI client    │  Cursor · Continue.dev · Aider · SDK
+└─────────┬──────────┘
+          │ OpenAI API + sk-cpb-…
+          ▼
+┌────────────────────┐
+│  ClinePass Bridge  │  · reads ~/.cline credential store
+│   (this project)   │  · auto-refreshes WorkOS tokens
+└─────────┬──────────┘  · retries 401 with fresh token
+          │ WorkOS bearer token
+          ▼
+┌────────────────────┐
+│   api.cline.bot    │  kimi-k3 · glm-5.2 · deepseek-v4-pro
+└────────────────────┘  qwen3.7-max · minimax-m3 · +6 more</pre>
         </div>
 
         <div class="callout info">
           <span class="callout-icon">ℹ️</span>
-          <div><strong>How it works:</strong> the bridge reads your local Cline CLI credential store, so as long as you use the Cline CLI or VS Code extension, tokens stay fresh automatically.</div>
+          <div><strong>How it stays fresh:</strong> the bridge reads the same credential file your Cline CLI uses. As long as you open the Cline CLI or VS Code extension occasionally, tokens rotate automatically.</div>
+        </div>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <h4><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>Your own API keys</h4>
+            <p>Generate <code>sk-cpb-…</code> keys per tool. Timing-safe validation, multiple keys supported.</p>
+          </div>
+          <div class="feature-card">
+            <h4><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Zero token babysitting</h4>
+            <p>Auto-refresh via WorkOS. Written back to CLI store so CLI + bridge stay in sync.</p>
+          </div>
+          <div class="feature-card">
+            <h4><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Streaming built-in</h4>
+            <p>Full SSE passthrough. Real-time tokens flow straight to your client.</p>
+          </div>
+          <div class="feature-card">
+            <h4><svg viewBox="0 0 24 24"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>Deploy anywhere</h4>
+            <p>One codebase for local and cloud. Docker, Fly.io, Railway ready.</p>
+          </div>
         </div>
       </section>
 
       <!-- Quick Start -->
       <section id="quickstart" class="reveal">
         <h2>Quick Start</h2>
-        <p>Get up and running in under a minute.</p>
+        <p>From zero to first API call in under a minute.</p>
 
         <div class="steps">
           <div class="step">
@@ -424,7 +565,7 @@ footer{
           </div>
 
           <div class="step">
-            <div class="step-title">Configure .env</div>
+            <div class="step-title">Configure environment</div>
             <div class="codeblock">
               <div class="codeblock-header">
                 <span>.env</span>
@@ -470,25 +611,27 @@ footer{
       <!-- Authentication -->
       <section id="authentication" class="reveal">
         <h2>Authentication</h2>
-        <p>The bridge resolves a valid Cline access token in this order:</p>
+        <p>Two layers of auth: your client proves itself with an <code>sk-cpb-…</code> key, the bridge proves itself to Cline with a WorkOS token.</p>
+        
+        <h3>Token resolution order</h3>
         <ol>
-          <li>In-memory token (fastest)</li>
-          <li>Bridge-local cache file (<code>.cache/tokens.json</code>)</li>
-          <li>Cline CLI credential store (<code>~/.cline/data/settings/providers.json</code>)</li>
-          <li>Environment override (<code>CLINE_ACCESS_TOKEN</code>)</li>
-          <li>WorkOS <code>refresh_token</code> grant (single-flight, persisted)</li>
+          <li><strong>In-memory cache</strong> — fastest path, no disk I/O</li>
+          <li><strong>Bridge cache</strong> — <code>.cache/tokens.json</code> (self-refreshed tokens)</li>
+          <li><strong>Cline CLI store</strong> — <code>~/.cline/data/settings/providers.json</code></li>
+          <li><strong>Environment override</strong> — <code>CLINE_ACCESS_TOKEN</code> / <code>CLINE_REFRESH_TOKEN</code></li>
+          <li><strong>WorkOS refresh</strong> — single-flight grant, persisted to both caches</li>
         </ol>
 
         <div class="callout info">
           <span class="callout-icon">🔑</span>
-          <div>When a token is refreshed, it's written back to <strong>both</strong> the bridge cache <em>and</em> the Cline CLI store, keeping CLI + bridge in sync.</div>
+          <div>When a token is refreshed, it's written back to <strong>both</strong> the bridge cache <em>and</em> the Cline CLI store. CLI and bridge never fight over stale tokens.</div>
         </div>
       </section>
 
       <!-- Integrations -->
       <section id="integrations" class="reveal">
         <h2>Integrations</h2>
-        <p>Any OpenAI-compatible client works. Set the base URL and your <code>sk-cpb-…</code> key.</p>
+        <p>Any OpenAI-compatible client works out of the box. Set the base URL and your key.</p>
 
         <div class="table-wrap">
           <table>
@@ -555,7 +698,7 @@ console.<span class="tk-f">log</span>(res.choices[<span class="tk-n">0</span>].m
       <!-- Streaming -->
       <section id="streaming" class="reveal">
         <h2>Streaming</h2>
-        <p>Add <code>"stream": true</code> to any request — the bridge passes SSE through verbatim.</p>
+        <p>Add <code>"stream": true</code> to any request. The bridge passes SSE through verbatim — no buffering, no re-chunking.</p>
 
         <div class="codeblock">
           <div class="codeblock-header">
@@ -585,7 +728,7 @@ stream = client.chat.completions.create(
       <!-- Models -->
       <section id="models" class="reveal">
         <h2>Models</h2>
-        <p>All 11 Cline Pass models. Use the short alias or the full <code>cline-pass/…</code> ID.</p>
+        <p>All 11 Cline Pass models. Use the short alias or the full <code>cline-pass/…</code> ID — the bridge resolves both.</p>
 
         <div class="model-grid">
           <div class="model-card"><div class="model-name">kimi-k3</div><div class="model-ctx">1M ctx</div></div>
@@ -605,6 +748,7 @@ stream = client.chat.completions.create(
       <!-- API Reference -->
       <section id="api" class="reveal">
         <h2>API Reference</h2>
+        <p>The bridge implements the OpenAI Chat Completions surface. Every other field passes through to upstream unchanged.</p>
 
         <div class="table-wrap">
           <table>
@@ -627,6 +771,7 @@ stream = client.chat.completions.create(
       <!-- Configuration -->
       <section id="config" class="reveal">
         <h2>Configuration</h2>
+        <p>All config via environment variables. See <code>.env.example</code> for the full list.</p>
 
         <div class="table-wrap">
           <table>
@@ -646,6 +791,7 @@ stream = client.chat.completions.create(
       <!-- Deploy -->
       <section id="deploy" class="reveal">
         <h2>Deploy</h2>
+        <p>One codebase, two modes. Local dev reads the Cline CLI store; production uses env-provided tokens.</p>
 
         <h3>Docker</h3>
         <div class="codeblock">
@@ -676,7 +822,7 @@ stream = client.chat.completions.create(
         </div>
 
         <h3>Railway</h3>
-        <p>Railway auto-detects the <code>Dockerfile</code>. Connect the repo, set env vars, mount a volume at <code>/app/.cache</code>.</p>
+        <p>Railway auto-detects the <code>Dockerfile</code>. Connect the repo, set the same env vars, and mount a persistent volume at <code>/app/.cache</code> so refreshed tokens survive redeploys.</p>
 
         <div class="callout danger">
           <span class="callout-icon">🚫</span>
@@ -704,7 +850,7 @@ stream = client.chat.completions.create(
     </div>
 
     <footer>
-      <img src="./assets/cline-icon.svg" alt="Cline" width="32" height="33" style="margin-bottom:12px;opacity:.7">
+      <img src="./assets/cline-icon.svg" alt="Cline" width="32" height="33">
       <div style="margin-bottom:8px">
         <a href="https://github.com/mocasus/clinepass-bridge">GitHub</a> · MIT License
       </div>
@@ -731,7 +877,7 @@ stream = client.chat.completions.create(
 </div>
 
 <script>
-// ===== Reveal on scroll =====
+// Reveal on scroll
 const io = new IntersectionObserver((entries) => {
   entries.forEach(e => {
     if (e.isIntersecting) {
@@ -742,7 +888,7 @@ const io = new IntersectionObserver((entries) => {
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-// ===== Copy buttons =====
+// Copy buttons
 document.querySelectorAll('[data-copy]').forEach(btn => {
   btn.addEventListener('click', () => {
     const block = btn.closest('.codeblock');
@@ -758,7 +904,7 @@ document.querySelectorAll('[data-copy]').forEach(btn => {
   });
 });
 
-// ===== Tabs =====
+// Tabs
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
     const target = tab.dataset.tab;
@@ -770,7 +916,7 @@ document.querySelectorAll('.tab').forEach(tab => {
   });
 });
 
-// ===== Active nav highlight =====
+// Active nav highlight
 const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.sidebar-link[href^="#"]');
 const tocLinks = document.querySelectorAll('.toc-link');
