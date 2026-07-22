@@ -7,6 +7,20 @@ export function extractBearerToken(authorizationHeader: string | undefined): str
   return match?.[1] ?? null;
 }
 
+/**
+ * Extracts an API key from either an `Authorization: Bearer <key>` header
+ * (OpenAI-style) or an `x-api-key: <key>` header (Anthropic-style).
+ */
+export function extractApiKey(
+  authorizationHeader: string | undefined,
+  apiKeyHeader: string | undefined,
+): string | null {
+  const bearer = extractBearerToken(authorizationHeader);
+  if (bearer) return bearer;
+  if (apiKeyHeader && apiKeyHeader.trim()) return apiKeyHeader.trim();
+  return null;
+}
+
 /** Constant-time membership check against the configured API keys. */
 export function isValidApiKey(presented: string | null, validKeys: readonly string[]): boolean {
   if (!presented) return false;

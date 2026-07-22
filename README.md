@@ -32,6 +32,10 @@ any tool that speaks the OpenAI API — Cursor, Continue.dev, LibreChat, the `op
   tokens back (cache file + CLI store)
 - ✅ Your own API keys (`sk-cpb-…`), multiple supported
 - ✅ Retries once on `401/403` with a force-refreshed token
+- ✅ **Anthropic Messages API** — `POST /v1/messages` (streaming + non-streaming),
+  so Claude Code, the Anthropic SDK, and any Anthropic-API client can use Cline
+  Pass too. Authenticate with `x-api-key: sk-cpb-…` (the OpenAI
+  `Authorization: Bearer` header is also accepted).
 
 ## OpenAI API compatibility
 
@@ -47,7 +51,8 @@ anything the upstream honors — `temperature`, `max_tokens`, `tools`,
 | `GET /health` | ✅ | deploy health checks |
 | `/v1/embeddings` | ❌ | not implemented |
 | `/v1/images/*`, `/v1/audio/*` | ❌ | not implemented |
-| `/v1/assistants`, `/v1/threads`, `/v1/messages` | ❌ | Assistants API not implemented |
+| `POST /v1/messages` | ✅ | Anthropic Messages API (streaming + non-streaming); body translated to/from OpenAI Chat Completions |
+| `/v1/assistants`, `/v1/threads` | ❌ | Assistants API not implemented |
 | `/v1/responses` | ❌ | Responses API not implemented |
 
 **Tool / function calling:** the request body is forwarded verbatim, so it works
@@ -356,6 +361,50 @@ docker run -d -p 8787:8080 --name clinepass-bridge \
 | `cline-pass/kimi-k2.6` | 262,144 | `kimi-k2.6` |
 
 Short aliases (`kimi-k3`, `glm-5.2`, …) resolve automatically.
+
+## Use with Anthropic clients (Claude Code, Anthropic SDK)
+
+The bridge also speaks the **Anthropic Messages API** at `POST /v1/messages`,
+so any Anthropic-API client works. Authenticate with your bridge key in the
+`x-api-key` header (the OpenAI `Authorization: Bearer` header is accepted too).
+
+**Claude Code** — point it at the bridge with env vars, then run `claude`:
+
+```bash
+export ANTHROPIC_BASE_URL=http://127.0.0.1:8787
+export ANTHROPIC_API_KEY=sk-cpb-…
+```
+
+**Anthropic Python SDK:**
+
+```python
+import anthropic
+
+client = anthropic.Anthropic(
+    api_key="sk-cpb-…",
+    base_url="http://127.0.0.1:8787",
+)
+msg = client.messages.create(
+    model="kimi-k3",
+    max_tokens=1024,
+    messages=[{"role": "user", "content": "hi"}],
+)
+```
+
+**curl:**
+
+```bash
+curl http://127.0.0.1:8787/v1/messages \
+  -H "x-api-key: sk-cpb-…" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "content-type: application/json" \
+  -d '{"model":"kimi-k3","max_tokens":256,"messages":[{"role":"user","content":"hi"}]}'
+```
+
+The bridge translates Anthropic `messages` / `system` / `tools` / `tool_choice`
+to OpenAI Chat Completions and converts the response (and the SSE stream) back
+to the Anthropic shape — including `tool_use` / `tool_result` blocks and
+`input_json_delta` streaming.
 
 ## Development
 
