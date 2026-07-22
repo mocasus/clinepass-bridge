@@ -406,14 +406,16 @@ footer img{margin-bottom:14px;opacity:.7}
 }
 @media(max-width:1100px){.toc{display:none}}
 @media(max-width:860px){
-  .mobile-header{display:flex}
+  .mobile-header{display:flex;transition:opacity .2s}
   .sidebar{
-    position:fixed;left:-264px;top:0;bottom:0;z-index:100;
+    position:fixed;left:-264px;top:0;bottom:0;z-index:200;
     transition:left .3s ease;
     height:100vh;
   }
   .sidebar.open{left:0;box-shadow:0 0 60px rgba(0,0,0,.7)}
+  .sidebar-backdrop{z-index:150}
   body:has(.sidebar.open) .sidebar-backdrop{display:block}
+  body:has(.sidebar.open) .mobile-header{opacity:0;pointer-events:none}
   .content{padding:32px 20px 80px}
   .hero h1{font-size:30px}
   .hero-logo{width:100%;height:auto}
