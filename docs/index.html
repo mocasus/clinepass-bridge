@@ -583,13 +583,13 @@ a:focus-visible,button:focus-visible,.tab:focus-visible{
 <text x="150" y="27" font-family="'Space Grotesk','Inter',sans-serif" font-size="23" font-weight="500" letter-spacing="-0.5" fill="#a78bfa">Pass Bridge</text>
 </svg>
         <div class="hero-tagline">One Pass. Every Tool.</div>
-        <p>An OpenAI-compatible API bridge that lets you use your <strong>Cline Pass</strong> subscription from any tool — Cursor, Continue.dev, Aider, LibreChat, or the <code>openai</code> SDK.</p>
+        <p>An OpenAI- <em>and</em> Anthropic-compatible API bridge that lets you use your <strong>Cline Pass</strong> subscription from any tool — Cursor, Continue.dev, Aider, LibreChat, Claude Code, the <code>openai</code> SDK, or the Anthropic SDK.</p>
       </div>
 
       <!-- Introduction -->
       <section id="introduction" class="reveal">
         <h2>Introduction</h2>
-        <p>Cline Pass is a subscription that gives you access to top coding models through Cline's own clients. But what if you want to use it in <em>your</em> tools? That's where this bridge comes in — it speaks the OpenAI API on the outside and Cline's internal protocol on the inside.</p>
+        <p>Cline Pass is a subscription that gives you access to top coding models through Cline's own clients. But what if you want to use it in <em>your</em> tools? That's where this bridge comes in — it speaks the OpenAI API <em>and</em> the Anthropic Messages API on the outside, and Cline's internal protocol on the inside.</p>
         
         <div class="codeblock">
           <div class="codeblock-header">
@@ -598,7 +598,7 @@ a:focus-visible,button:focus-visible,.tab:focus-visible{
           </div>
           <pre>┌────────────────────┐
 │   Your favorite    │
-│   OpenAI client    │  Cursor · Continue.dev · Aider · SDK
+│   OpenAI client    │  Cursor · Continue.dev · Claude Code · Aider · SDK
 └─────────┬──────────┘
           │ OpenAI API + sk-cpb-…
           ▼
@@ -800,6 +800,59 @@ console.<span class="tk-f">log</span>(res.choices[<span class="tk-n">0</span>].m
         </div>
       </section>
 
+      <!-- Anthropic Clients -->
+      <section id="anthropic" class="reveal">
+        <h2>Anthropic Clients</h2>
+        <p>The bridge also speaks the <strong>Anthropic Messages API</strong> at <code>POST /v1/messages</code>, so Claude Code, the Anthropic SDK, and any Anthropic-API client can use Cline Pass. Authenticate with <code>x-api-key: sk-cpb-…</code> — the OpenAI <code>Authorization: Bearer</code> header is accepted too.</p>
+
+        <div class="codeblock">
+          <div class="codeblock-header">
+            <span>claude-code.sh</span>
+            <button class="copy-btn" data-copy>Copy</button>
+          </div>
+          <pre><span class="tk-f">export</span> ANTHROPIC_BASE_URL=http://127.0.0.1:8787
+<span class="tk-f">export</span> ANTHROPIC_API_KEY=sk-cpb-…
+claude</pre>
+        </div>
+
+        <div class="codeblock">
+          <div class="codeblock-header">
+            <span>anthropic_sdk.py</span>
+            <button class="copy-btn" data-copy>Copy</button>
+          </div>
+          <pre><span class="tk-k">import</span> anthropic
+
+client = anthropic.Anthropic(
+    api_key=<span class="tk-s">"sk-cpb-…"</span>,
+    base_url=<span class="tk-s">"http://127.0.0.1:8787"</span>,
+)
+msg = client.messages.create(
+    model=<span class="tk-s">"kimi-k3"</span>,
+    max_tokens=<span class="tk-n">1024</span>,
+    messages=[{<span class="tk-s">"role"</span>: <span class="tk-s">"user"</span>, <span class="tk-s">"content"</span>: <span class="tk-s">"hi"</span>}],
+)
+<span class="tk-f">print</span>(msg.content[<span class="tk-n">0</span>].text)</pre>
+        </div>
+
+        <div class="codeblock">
+          <div class="codeblock-header">
+            <span>curl</span>
+            <button class="copy-btn" data-copy>Copy</button>
+          </div>
+          <pre><span class="tk-f">curl</span> http://127.0.0.1:8787/v1/messages \
+  -H <span class="tk-s">"x-api-key: sk-cpb-…"</span> \
+  -H <span class="tk-s">"anthropic-version: 2023-06-01"</span> \
+  -H <span class="tk-s">"content-type: application/json"</span> \
+  -d <span class="tk-s">'{"model":"kimi-k3","max_tokens":256,"messages":[{"role":"user","content":"hi"}]}'</span></pre>
+        </div>
+
+        <div class="callout info">
+          <span class="callout-icon">🔄</span>
+          <div><strong>How it works:</strong> the bridge translates Anthropic <code>messages</code> / <code>system</code> / <code>tools</code> / <code>tool_choice</code> to OpenAI Chat Completions, and converts the response (and the SSE stream) back to the Anthropic shape — including <code>tool_use</code> / <code>tool_result</code> blocks and <code>input_json_delta</code> streaming.</div>
+        </div>
+      </section>
+
+
       <!-- Streaming -->
       <section id="streaming" class="reveal">
         <h2>Streaming</h2>
@@ -859,6 +912,7 @@ stream = client.chat.completions.create(
           <table>
             <tr><th>Endpoint</th><th>Status</th><th>Notes</th></tr>
             <tr><td>POST /v1/chat/completions</td><td><span class="badge ok">ready</span></td><td>Streaming + non-streaming</td></tr>
+            <tr><td>POST /v1/messages</td><td><span class="badge ok">ready</span></td><td>Anthropic Messages API — Claude Code, Anthropic SDK</td></tr>
             <tr><td>GET /v1/models</td><td><span class="badge ok">ready</span></td><td>11 models + aliases</td></tr>
             <tr><td>GET /health</td><td><span class="badge ok">ready</span></td><td>Health check</td></tr>
             <tr><td>POST /v1/embeddings</td><td><span class="badge no">not planned</span></td><td>Not supported upstream</td></tr>
@@ -971,6 +1025,7 @@ stream = client.chat.completions.create(
     <a href="#authentication" class="toc-link">Authentication</a>
     <a href="#integrations" class="toc-link">Integrations</a>
     <a href="#sdk" class="toc-link">SDK Examples</a>
+    <a href="#anthropic" class="toc-link">Anthropic Clients</a>
     <a href="#streaming" class="toc-link">Streaming</a>
     <a href="#models" class="toc-link">Models</a>
     <a href="#api" class="toc-link">API Reference</a>
