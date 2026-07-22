@@ -377,15 +377,27 @@ footer{
 footer img{margin-bottom:14px;opacity:.7}
 
 /* Mobile */
-.menu-btn{
+.mobile-header{
   display:none;
-  position:fixed;top:14px;left:14px;z-index:101;
-  background:var(--panel);border:1px solid var(--border-strong);
-  color:var(--text);width:40px;height:40px;border-radius:8px;
-  cursor:pointer;font-size:18px;line-height:1;
-  align-items:center;justify-content:center;
-  backdrop-filter:blur(8px);
+  position:sticky;top:0;z-index:90;
+  align-items:center;gap:12px;
+  padding:10px 16px;
+  background:rgba(14,14,16,.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
 }
+.menu-btn{
+  background:var(--panel);border:1px solid var(--border-strong);
+  color:var(--text);width:36px;height:36px;border-radius:8px;
+  cursor:pointer;font-size:16px;line-height:1;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.mobile-header-brand{
+  display:flex;align-items:center;gap:8px;
+  font-family:'Space Grotesk','Inter',sans-serif;
+  font-size:14px;font-weight:600;letter-spacing:-.2px;
+}
+.mobile-header-brand img{width:18px;height:19px}
 .sidebar-backdrop{
   display:none;
   position:fixed;inset:0;z-index:99;
@@ -394,16 +406,15 @@ footer img{margin-bottom:14px;opacity:.7}
 }
 @media(max-width:1100px){.toc{display:none}}
 @media(max-width:860px){
-  .menu-btn{display:flex}
+  .mobile-header{display:flex}
   .sidebar{
     position:fixed;left:-264px;top:0;bottom:0;z-index:100;
     transition:left .3s ease;
     height:100vh;
   }
   .sidebar.open{left:0;box-shadow:0 0 60px rgba(0,0,0,.7)}
-  .sidebar.open ~ .sidebar-backdrop,
   body:has(.sidebar.open) .sidebar-backdrop{display:block}
-  .content{padding:64px 20px 80px}
+  .content{padding:32px 20px 80px}
   .hero h1{font-size:30px}
   .hero-logo{width:100%;height:auto}
 }
@@ -419,7 +430,6 @@ footer img{margin-bottom:14px;opacity:.7}
 </head>
 <body>
 
-<button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Toggle menu">☰</button>
 <div class="sidebar-backdrop" onclick="document.querySelector('.sidebar').classList.remove('open')"></div>
 
 <div class="layout">
@@ -497,6 +507,13 @@ footer img{margin-bottom:14px;opacity:.7}
 
   <!-- ============ MAIN ============ -->
   <main class="main">
+    <div class="mobile-header">
+      <button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Toggle menu">☰</button>
+      <div class="mobile-header-brand">
+        <img src="./assets/cline-icon.svg" alt="Cline">
+        <span>ClinePass Bridge</span>
+      </div>
+    </div>
     <div class="content">
 
       <!-- Hero -->
