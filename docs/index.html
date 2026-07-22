@@ -158,7 +158,17 @@ a:hover{color:var(--purple-strong)}
 .content{
   max-width:780px;padding:48px 48px 120px;
   margin:0 auto;
+  position:relative;
 }
+/* Ambient glow at top of page */
+.main::before{
+  content:'';
+  position:fixed;top:0;left:264px;right:0;height:420px;
+  background:radial-gradient(ellipse 700px 340px at 50% -60px,var(--purple-soft),transparent 70%);
+  pointer-events:none;z-index:0;
+}
+@media(max-width:860px){.main::before{left:0}}
+.content > *{position:relative;z-index:1}
 .hero{
   padding:24px 0 48px;
   border-bottom:1px solid var(--border);
@@ -194,6 +204,14 @@ h2{
   font-size:25px;font-weight:700;letter-spacing:-.5px;
   margin-bottom:12px;color:var(--text);
 }
+h2 .anchor,h3 .anchor{
+  opacity:0;margin-left:8px;
+  color:var(--text-3);font-weight:400;
+  text-decoration:none;font-size:.8em;
+  transition:opacity .15s,color .15s;
+}
+h2:hover .anchor,h3:hover .anchor{opacity:1}
+h2 .anchor:hover,h3 .anchor:hover{color:var(--purple)}
 h3{font-size:17px;font-weight:600;margin:30px 0 10px;color:var(--text)}
 p{color:var(--text-2);margin-bottom:14px}
 strong{color:var(--text)}
@@ -425,6 +443,31 @@ footer img{margin-bottom:14px;opacity:.7}
 .sidebar-nav::-webkit-scrollbar{width:6px}
 .sidebar-nav::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
 .sidebar-nav::-webkit-scrollbar-track{background:transparent}
+body::-webkit-scrollbar{width:10px}
+body::-webkit-scrollbar-thumb{background:var(--panel-2);border-radius:5px;border:2px solid var(--bg)}
+body::-webkit-scrollbar-track{background:var(--bg)}
+html{scrollbar-color:var(--panel-2) var(--bg)}
+
+/* Focus states */
+a:focus-visible,button:focus-visible,.tab:focus-visible{
+  outline:2px solid var(--purple);outline-offset:2px;border-radius:4px;
+}
+
+/* Back to top */
+.back-to-top{
+  position:fixed;bottom:24px;right:24px;z-index:80;
+  width:40px;height:40px;border-radius:10px;
+  background:var(--panel);border:1px solid var(--border-strong);
+  color:var(--text-2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;
+  transform:translateY(8px);
+  transition:all .25s;
+  backdrop-filter:blur(8px);
+}
+.back-to-top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+.back-to-top:hover{color:var(--purple);border-color:var(--purple)}
+.back-to-top svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -433,6 +476,10 @@ footer img{margin-bottom:14px;opacity:.7}
 <body>
 
 <div class="sidebar-backdrop" onclick="document.querySelector('.sidebar').classList.remove('open')"></div>
+
+<button class="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">
+  <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+</button>
 
 <div class="layout">
 
@@ -995,6 +1042,29 @@ document.querySelectorAll('.sidebar-link').forEach(l => {
   l.addEventListener('click', () => {
     document.querySelector('.sidebar').classList.remove('open');
   });
+});
+
+// Back-to-top visibility
+const btt = document.querySelector('.back-to-top');
+window.addEventListener('scroll', () => {
+  btt.classList.toggle('show', window.scrollY > 500);
+}, { passive: true });
+
+// Heading anchor links (h2/h3 inside sections with id)
+document.querySelectorAll('section[id] h2').forEach(h => {
+  const id = h.closest('section').id;
+  const a = document.createElement('a');
+  a.className = 'anchor';
+  a.href = '#' + id;
+  a.textContent = '#';
+  a.setAttribute('aria-label', 'Link to this section');
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    const url = location.origin + location.pathname + '#' + id;
+    navigator.clipboard.writeText(url).catch(() => {});
+    history.replaceState(null, '', '#' + id);
+  });
+  h.appendChild(a);
 });
 </script>
 
