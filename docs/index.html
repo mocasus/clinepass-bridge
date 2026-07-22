@@ -377,23 +377,35 @@ footer{
 footer img{margin-bottom:14px;opacity:.7}
 
 /* Mobile */
-@media(max-width:1100px){.toc{display:none}}
-@media(max-width:860px){
-  .sidebar{
-    position:fixed;left:-264px;z-index:100;
-    transition:left .3s;
-  }
-  .sidebar.open{left:0;box-shadow:0 0 60px rgba(0,0,0,.7)}
-  .content{padding:32px 20px 80px}
-  .hero h1{font-size:30px}
-  .menu-btn{display:block}
-}
 .menu-btn{
   display:none;
-  position:fixed;top:16px;left:16px;z-index:101;
-  background:var(--panel);border:1px solid var(--border);
-  color:var(--text);padding:8px 12px;border-radius:6px;
-  cursor:pointer;font-size:18px;
+  position:fixed;top:14px;left:14px;z-index:101;
+  background:var(--panel);border:1px solid var(--border-strong);
+  color:var(--text);width:40px;height:40px;border-radius:8px;
+  cursor:pointer;font-size:18px;line-height:1;
+  align-items:center;justify-content:center;
+  backdrop-filter:blur(8px);
+}
+.sidebar-backdrop{
+  display:none;
+  position:fixed;inset:0;z-index:99;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(2px);
+}
+@media(max-width:1100px){.toc{display:none}}
+@media(max-width:860px){
+  .menu-btn{display:flex}
+  .sidebar{
+    position:fixed;left:-264px;top:0;bottom:0;z-index:100;
+    transition:left .3s ease;
+    height:100vh;
+  }
+  .sidebar.open{left:0;box-shadow:0 0 60px rgba(0,0,0,.7)}
+  .sidebar.open ~ .sidebar-backdrop,
+  body:has(.sidebar.open) .sidebar-backdrop{display:block}
+  .content{padding:64px 20px 80px}
+  .hero h1{font-size:30px}
+  .hero-logo{width:100%;height:auto}
 }
 
 /* Scrollbar */
@@ -407,7 +419,8 @@ footer img{margin-bottom:14px;opacity:.7}
 </head>
 <body>
 
-<button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+<button class="menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Toggle menu">☰</button>
+<div class="sidebar-backdrop" onclick="document.querySelector('.sidebar').classList.remove('open')"></div>
 
 <div class="layout">
 
@@ -957,6 +970,13 @@ const highlightIO = new IntersectionObserver((entries) => {
   });
 }, { rootMargin: '-20% 0px -70% 0px' });
 sections.forEach(s => highlightIO.observe(s));
+
+// Close mobile sidebar on nav link tap
+document.querySelectorAll('.sidebar-link').forEach(l => {
+  l.addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.remove('open');
+  });
+});
 </script>
 
 </body>
