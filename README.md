@@ -143,17 +143,93 @@ Expected response (non-streaming):
 ✅ Got a JSON reply with `"choices"`? You're live. Point any tool at
 `http://127.0.0.1:8787/v1` with your `sk-cpb-…` key.
 
-## Use with your favorite tools
+## IDE & tool support
 
-Point any OpenAI-compatible client at the bridge:
+The bridge speaks the **OpenAI Chat Completions API**, so any client that lets you point
+at a custom OpenAI endpoint just works. Point it at `http://127.0.0.1:8787/v1` (or your
+deployed URL) and use your `sk-cpb-…` key as the API key.
 
-| Tool | Base URL | API Key |
+<p align="center">
+  <sub><b>Works with any OpenAI-compatible client</b></sub>
+
+  <br>
+  <a href='https://cursor.com'><img src='https://img.shields.io/badge/Cursor-compatible-000000?logo=cursor&logoColor=white' alt='https://cursor.com'></a>
+  <a href='https://code.visualstudio.com'><img src='https://img.shields.io/badge/VS_Code-compatible-007ACC?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHRpdGxlPmZpbGVfdHlwZV92c2NvZGU8L3RpdGxlPjxwYXRoIGQ9Ik0yOS4wMSw1LjAzLDIzLjI0NCwyLjI1NGExLjc0MiwxLjc0MiwwLDAsMC0xLjk4OS4zMzhMMi4zOCwxOS44QTEuMTY2LDEuMTY2LDAsMCwwLDIuMywyMS40NDdjLjAyNS4wMjcuMDUuMDUzLjA3Ny4wNzdsMS41NDEsMS40YTEuMTY1LDEuMTY1LDAsMCwwLDEuNDg5LjA2NkwyOC4xNDIsNS43NUExLjE1OCwxLjE1OCwwLDAsMSwzMCw2LjY3MlY2LjYwNUExLjc0OCwxLjc0OCwwLDAsMCwyOS4wMSw1LjAzWiIgc3R5bGU9ImZpbGw6IzAwNjVhOSIvPjxwYXRoIGQ9Ik0yOS4wMSwyNi45N2wtNS43NjYsMi43NzdhMS43NDUsMS43NDUsMCwwLDEtMS45ODktLjMzOEwyLjM4LDEyLjJBMS4xNjYsMS4xNjYsMCwwLDEsMi4zLDEwLjU1M2MuMDI1LS4wMjcuMDUtLjA1My4wNzctLjA3N2wxLjU0MS0xLjRBMS4xNjUsMS4xNjUsMCwwLDEsNS40MSw5LjAxTDI4LjE0MiwyNi4yNUExLjE1OCwxLjE1OCwwLDAsMCwzMCwyNS4zMjhWMjUuNEExLjc0OSwxLjc0OSwwLDAsMSwyOS4wMSwyNi45N1oiIHN0eWxlPSJmaWxsOiMwMDdhY2MiLz48cGF0aCBkPSJNMjMuMjQ0LDI5Ljc0N2ExLjc0NSwxLjc0NSwwLDAsMS0xLjk4OS0uMzM4QTEuMDI1LDEuMDI1LDAsMCwwLDIzLDI4LjY4NFYzLjMxNmExLjAyNCwxLjAyNCwwLDAsMC0xLjc0OS0uNzI0LDEuNzQ0LDEuNzQ0LDAsMCwxLDEuOTg5LS4zMzlsNS43NjUsMi43NzJBMS43NDgsMS43NDgsMCwwLDEsMzAsNi42VjI1LjRhMS43NDgsMS43NDgsMCwwLDEtLjk5MSwxLjU3NloiIHN0eWxlPSJmaWxsOiMxZjljZjAiLz48L3N2Zz4=&logoColor=white' alt='https://code.visualstudio.com'></a>
+  <a href='https://www.continue.dev'><img src='https://img.shields.io/badge/Continue.dev-compatible-000000?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAADD0lEQVR4nGL5/PkzAy0BE01NH7VgZFjAgl/606dPO3bsQRNkZ2f38nJjZWUlxgJG/Plg8uTpa9duRBMMDQ26f/9BV1cLExPhAMDng0ePHm/YsEVJSSEkJPDx4ydwcU5OjjNnzu3Zs5+VlVVKSkJNTZWRkZFkH/z//7+kpOrs2fMpKQmfP3/esGHzz5+/IFJBQX4vXrz8+PHz9evXExJieXi4g4L8SbbgyJHjNTWN9va2Dx8++vTpU3V12cuXryBSrKws+vp6mzZtFRMT3bZt57NnL5Ytm8fDw4PVHOxB9Pv375kz57KxsUlKih88eDg0NNDY2BBNwcGDh1+9eh0WFrx48fI5cxYUFORgNQp7LN24cVNFRSk5OX7Hjt28vDxxcVFoClhZWfPysn7+/HX37j11ddWNG7fevXufBAv+//9/+fLVu3fvCQsLpaYm8fLyYqoxNTW2sjI/duykmZnJ////Z8yYjdUo5qqqKkxRcXHx27fv3rlzNzY20t3dBVciUVVVuXXrDicnp5SUxLFjJ1VVVeTkZIj1wf///5mYmP/////v3z+sahgYGP78+fP3719GRsY/f/6A4pMFS4xit+DcuQtnz55XVVVetGj5pk1bcVkwY8bcGzdu8fPzHTly3MLCzNzchFgLODjYdXS0ZWWlP3/+PHfuog8fPmCqOX781KlTZ2xsrI4fP8nMzJyRkYzVKOwWaGhoPH78ZN68xW5uzl++fFm4cBmagl+/fk+aNI2dnU1BQe7OnXuBgb4KCvJYjcKeD5iZmTIzU8rLax8+fKyqqnz48FFzc5Pnz19CZNnZ2QwN9W1sLMXERA8cOCwoKJiYGIvVHAKFXUVF7YkTp5OT479+/bp27cbfv39DxENCAh48ePTr16/Ll68mJ8fx8fH5+XmTY8HTp88SE9MlJSX9/LyfPEEUdgICAvPnL66rq+Dg4JSQEFNUVCCnsIOAGTPmrFixBk0wODjg8eMnnZ3NeMwl1oLPn7/s3r0PTZCdnc3V1YmNjY2g6YQtoBwM/Up/1IKBtwAQAAD//7rlRWZ+M6P0AAAAAElFTkSuQmCC&logoColor=white' alt='https://www.continue.dev'></a>
+  <a href='https://aider.chat'><img src='https://img.shields.io/badge/Aider-compatible-EF3A42?logo=data:image/png;base64,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&logoColor=white' alt='https://aider.chat'></a>
+  <a href='https://platform.openai.com/docs/api-reference'><img src='https://img.shields.io/badge/OpenAI-compatible-412991?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAERElEQVR4nOyWW4hSXRvHn9luTYy0IrfCLsRIQa2otKibJLTmIi0toSAIMbywkwURHSEiQiKsiw4X0YUVEt3sDhBU0IkMK4t27AI7KBiEg47jzB7HEQ/Px/euF5F5G51e6CJ4/1drPfzX81trr7WetWlEhN8p6rdm/w8wFdE9HdVqleO4p0+flstllmX7/1JfX98UAX3dT5EgCB6Pp1AorF+/nmEYQRCePHnicrn8fv+XL18UCoXdbl+0aFE3Ak6uYrGo1Wq9Xm+pVCKRZrO5b98+AJBKpXq9fubMmQDg8/mKxeJkSboBTp48uXjx4lqtRrovXryw2WxSqfT48eOiKCJiq9W6f/8+y7ILFy4cGRn5NUAikTAYDLFYDBGz2ezWrVtlMlkwGPz27RsiViqV79+/E2cul2NZNhQKTRVQLpddLhf5gMlkEhGdTqfNZvv8+TMx3LlzZ+7cuRKJZOfOnUNDQ4h48eJFuVxerVanBHA6nRqN5vHjxzNmzHj16hUi2u32U6dOIWImk9m8eTNFUTt27Lh06ZJWq503bx7Hce/fvweA9gy6Ae7du0dR1Js3bxCxE3DkyJFjx47J5XIA2LJlS71eR8Th4eFdu3YBwNKlSwEgk8n0BgQCAZ/PR9qdAIqizGbz9evXb9y4YTAYjEbjtWvXCIbnea/XCwAPHjzoDVizZs3p06f/CfD7/c1mk8Sr1arb7QYAi8WSSCRI8MSJExqNhpyuTk0sFUqlslAotLsfPnwgjQULFlDU32a5XD5//nyLxWI2m1evXn3gwAEAOHr06LRp0+Lx+ISEEwErVqy4fft2vV4HgO3btweDwY0bN3Yi25ozZ86tW7fOnDlz+fLl/9ccmnY6nc+fP+8BCAQCoiju3bu30WhcuHAhmUw2Go1Pnz6lUqlyuUw8+Xye5/n2ytpjVSqVKIq9SwWZxbJly1KpFIk8e/bMZDLNnj07Go2eO3dOpVLRNG2328mdUCgUxOZwOA4fPtxjkxExnU4DgNVqpWl6//795CqNjY05HA4AmD59ejQa3bNnzwTA69evaZoWBKE34OPHjwDA8/zNmzcZhlGr1efPn9+0aRMAbNu2jVSIcDjcCXj06BHDMH6/v/cxRcTx8XGlUnn27FlEFEUxEomo1ep169a9ffuWGO7evavT6dxuNyJyHAcAMpksFApVKpUpARDx4MGDs2bNyuVypNtqtUhDEIS1a9fKZLJDhw6R8hmJRGw2248fP36aZ1LA6OjokiVLjEbjw4cPG40GIubz+d27d9M0vXLlSp7nia1Wq5lMpitXrkyWvVu5LpVKGzZsILvKsqxEIgGAcDjcXs3g4KDH4+l8MH6qHk9mOp1+9+5drVbT6/VXr16Nx+NWq9VgMAwMDLx8+XL58uWxWEyn03XJ0AMwQV+/fuU4LpvNMgzT39+/atWqnkN+DfAv9Of/eP35gP8FAAD//4LRqxZbTERiAAAAAElFTkSuQmCC&logoColor=white' alt='https://platform.openai.com/docs/api-reference'></a>
+  <a href='https://nousresearch.com'><img src='https://img.shields.io/badge/Hermes-compatible-FFD700?logo=data:image/png;base64,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&logoColor=white' alt='https://nousresearch.com'></a>
+</p>
+
+| Tool | Where to set it | Notes |
 |---|---|---|
-| **Continue.dev** | `http://127.0.0.1:8787/v1` | your `sk-cpb-…` |
-| **Cursor** (custom OpenAI) | `http://127.0.0.1:8787/v1` | your `sk-cpb-…` |
-| **LibreChat** | `http://127.0.0.1:8787/v1` | your `sk-cpb-…` |
+| **Cursor** | Settings → Models → *OpenAI API Key* | Set *Override OpenAI Base URL* to the bridge URL |
+| **Continue.dev** (VS Code & JetBrains) | `~/.continue/config.json` → `"provider": "openai"` | Runs inside VS Code and JetBrains IDEs |
+| **LibreChat** | `.env` → `OPENAI_REVERSE_PROXY` | Custom OpenAI-compatible endpoint |
+| **Aider** | `--openai-api-base` flag / env | LiteLLM `openai/<model>` prefix |
+| **OpenAI SDK** (Python / Node) | `base_url` / `baseURL` ctor arg | Drop-in for the `openai` package |
+| **`curl`** | `Authorization: Bearer …` header | Quick smoke test |
 
-**OpenAI SDK (Python / Node):**
+### Cursor
+
+1. Open **Cursor** → **Settings** (`Ctrl`/`Cmd` + `,`) → **Models**.
+2. Expand the **OpenAI API Key** section and paste your `sk-cpb-…` key.
+3. Turn on **Override OpenAI Base URL** and set it to `http://127.0.0.1:8787/v1`
+   (use your deployed URL in production).
+4. Add the model id to the custom-models list — e.g. `kimi-k3` (short alias) or
+   `cline-pass/kimi-k3` — then click **Verify**.
+5. Pick that model in chat. Done.
+
+### Continue.dev (VS Code & JetBrains)
+
+Continue is an extension for VS Code and JetBrains IDEs. Add a model to
+`~/.continue/config.json` (`%USERPROFILE%\.continue\config.json` on Windows):
+
+```json
+{
+  "models": [
+    {
+      "title": "Cline Pass — Kimi K3",
+      "provider": "openai",
+      "model": "cline-pass/kimi-k3",
+      "apiBase": "http://127.0.0.1:8787/v1",
+      "apiKey": "sk-cpb-…"
+    }
+  ]
+}
+```
+
+Reload the IDE and pick the model from Continue's dropdown. The `"provider": "openai"`
+mode speaks the OpenAI Chat Completions API, which is exactly what the bridge implements.
+
+### LibreChat
+
+LibreChat can front any OpenAI-compatible endpoint via its reverse-proxy setting. In your
+LibreChat `.env`:
+
+```ini
+OPENAI_API_KEY=sk-cpb-…
+OPENAI_REVERSE_PROXY=http://127.0.0.1:8787/v1/chat/completions
+OPENAI_MODELS=kimi-k3,glm-5.2,deepseek-v4-pro,qwen3.7-max
+ENDPOINTS=openai
+```
+
+Restart LibreChat and the Cline Pass models you listed appear under the OpenAI endpoint.
+
+### Aider
+
+Aider is driven by LiteLLM, so address the bridge as an `openai/` provider:
+
+```bash
+aider \
+  --model openai/kimi-k3 \
+  --openai-api-base http://127.0.0.1:8787/v1 \
+  --openai-api-key sk-cpb-…
+```
+
+…or via env: `OPENAI_API_BASE=http://127.0.0.1:8787/v1` + `OPENAI_API_KEY=sk-cpb-…`.
+
+### OpenAI SDK (Python / Node)
 
 ```python
 from openai import OpenAI
@@ -173,6 +249,26 @@ const res = await client.chat.completions.create({
 });
 console.log(res.choices[0].message.content);
 ```
+
+### `curl`
+
+```bash
+curl http://127.0.0.1:8787/v1/chat/completions \
+  -H "Authorization: Bearer sk-cpb-…" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"kimi-k3","messages":[{"role":"user","content":"hi"}]}'
+```
+
+> On **Windows CMD** swap `\` for `^` line-continuations and escape the quotes:
+> `-d "{\"model\":\"kimi-k3\",\"messages\":[{\"role\":\"user\",\"content\":\"hi\"}]}"`
+> (PowerShell just needs normal quoting.)
+
+### Which models can I use?
+
+The bridge serves the **11 Cline Pass models** listed under [Models](#models) and accepts
+both short aliases (`kimi-k3`) and full ids (`cline-pass/kimi-k3`). Any other model name in
+a request is forwarded to `api.cline.bot` **unchanged**, so it works with whatever the
+upstream exposes — the bridge never invents or blocks a model name.
 
 ## Configuration
 

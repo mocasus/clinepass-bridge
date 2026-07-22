@@ -3,3 +3,7 @@ dist/
 .cache/
 .env
 *.log
+
+# logo/badge build scratch (downloaded brand assets)
+/_*.png
+/_*.svg
